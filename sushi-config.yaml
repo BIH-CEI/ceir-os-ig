@@ -1,0 +1,68 @@
+id: ceir-os-ig
+canonical: https://bih-cei.github.io/ceir-os-ig
+name: CEIROSImplementationGuide
+title: "CEIR-OS Bedienungsanleitung"
+description: "Bedienungsanleitung für CEIR-OS – Claude-Enabled Interoperability Research Operating Stack"
+status: draft
+version: 0.1.0
+fhirVersion: 4.0.1
+copyrightYear: 2024+
+releaseLabel: ci-build
+publisher:
+  name: Berlin Institute of Health at Charité
+  url: https://www.bihealth.org
+  email: thomas.debertolis@bih-charite.de
+jurisdiction: urn:iso:std:iso:3166#DE "Germany"
+language: de
+parameters:
+  show-hierarchies: true
+  apply-publisher: true
+  apply-contact: true
+  apply-jurisdiction: true
+  apply-version: true
+
+pages:
+  index.md:
+    title: Übersicht
+  architektur.md:
+    title: System-Architektur
+  installation.md:
+    title: Installation
+  terminologie-mcp.md:
+    title: Terminology MCP Server
+  snowstorm.md:
+    title: Snowstorm SNOMED CT
+  fhir-spec-mcp.md:
+    title: FHIR Spezifikations-Navigator
+  askmii.md:
+    title: AskMII FDPG
+  zotero-comfort.md:
+    title: Zotero Literaturverwaltung
+  mcp-bridge.md:
+    title: MCP-OpenAI Bridge
+  lokale-llms.md:
+    title: Lokale LLMs
+  terminologie-tools.md:
+    title: Terminologie-Tools
+  fhir-mappings.md:
+    title: FHIR Mappings
+  troubleshooting.md:
+    title: Fehlerbehebung
+
+menu:
+  Übersicht: index.html
+  Installation: installation.html
+  Architektur: architektur.html
+  Services:
+    Terminology MCP: terminologie-mcp.html
+    Snowstorm: snowstorm.html
+    FHIR Navigator: fhir-spec-mcp.html
+    AskMII: askmii.html
+    Zotero: zotero-comfort.html
+    MCP Bridge: mcp-bridge.html
+    Lokale LLMs: lokale-llms.html
+  Anleitungen:
+    Tools: terminologie-tools.html
+    Mappings: fhir-mappings.html
+    Fehlerbehebung: troubleshooting.html
+  Artifacts: artifacts.html

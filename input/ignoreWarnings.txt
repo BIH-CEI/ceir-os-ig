@@ -1,0 +1,3 @@
+== Suppressed Messages ==
+# MCP extensions use custom structures not in standard FHIR
+%No matching profile found for resource%Extension%
