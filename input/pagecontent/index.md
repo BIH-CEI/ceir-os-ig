@@ -10,18 +10,39 @@ CEIR-OS stellt rund 13 Services bereit, die ueber ein gemeinsames Docker-Netzwer
 
 ### Service-Uebersicht
 
-| Service | Container | Port | Funktion |
-|---------|-----------|------|----------|
-| Elasticsearch | ceir-elasticsearch | (intern) | Datenbank fuer Snowstorm |
-| Snowstorm | ceir-snowstorm | 8090 | SNOMED CT FHIR Terminologieserver (v10.8.2) |
-| SNOMED Browser | ceir-browser | 4000 | Web-Oberflaeche fuer SNOMED CT |
-| Terminology MCP | ceir-terminology-mcp | 3000 / 3002 | HTTP-Proxy + MCP SSE (SNOMED, LOINC, ICD-10-GM, OPS, ATC) |
-| AskMII | ceir-ask-mii | 2026 | FDPG Query Builder MCP |
-| Zotero Comfort | ceir-zotero-comfort | 3001 | Literaturverwaltung MCP (Dual-Library) |
-| FHIR Spec MCP | ceir-fhir-spec-mcp | 8002 | FHIR R4 Spezifikationsnavigator |
-| Ollama | ceir-ollama | 11434 | Lokaler LLM-Server |
-| MCP Bridge | ceir-mcp-bridge | 8000 | OpenAI-kompatible API mit Tool-Anbindung |
-| Open WebUI | ceir-webui | 3080 | Chat-Oberflaeche |
+#### Terminologie-Services (lokal)
+
+| Service | Port | Quelle | Funktion |
+|---------|------|--------|----------|
+| Snowstorm | 8090 | Eigener Container | SNOMED CT FHIR TermServer (v10.8.2) auf Elasticsearch |
+| SNOMED Browser | 4000 | Eigener Container | Web-Oberflaeche fuer SNOMED CT |
+| Terminology MCP | 3000 / 3002 | Eigener Container | Zentraler Terminologie-Zugang mit 8 MCP-Tools |
+
+Der Terminology MCP aggregiert drei Terminologie-Quellen:
+
+| CodeSystem | Quelle | Offline-faehig |
+|-----------|--------|---------------|
+| SNOMED CT | Snowstorm (lokaler FHIR Server) | Ja |
+| LOINC (+ deutsche Labels) | Lokale Dateien (vorindexiert) | Ja |
+| ICD-10-GM, OPS, ATC | MII OntoServer (remote, mTLS) | Nein |
+
+Details: [Terminology MCP Server](terminologie-mcp.html) · [Terminologie-Tools](terminologie-tools.html)
+
+#### KI und Chat
+
+| Service | Port | Funktion |
+|---------|------|----------|
+| Ollama | 11434 | Lokaler LLM-Server (qwen2.5:7b Standard) |
+| MCP Bridge | 8000 | OpenAI-kompatible API mit Tool-Routing zu MCP-Servern |
+| Open WebUI | 3080 | Chat-Oberflaeche mit Tool-Unterstuetzung |
+
+#### Forschungswerkzeuge
+
+| Service | Port | Funktion |
+|---------|------|----------|
+| AskMII | 2026 | FDPG Query Builder (KDS 2026.0.0) |
+| Zotero Comfort | 3001 | Literaturverwaltung MCP (Gruppen- + persoenliche Bibliothek) |
+| FHIR Spec MCP | 8002 | FHIR R4 Spezifikationsnavigator |
 
 ### Schnellstart
 

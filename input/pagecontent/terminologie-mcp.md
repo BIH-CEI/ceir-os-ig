@@ -14,23 +14,57 @@ Der Server stellt **zwei Schnittstellen** bereit:
 - **Port 3000 (HTTP REST)**: Klassische HTTP-Endpunkte fuer Terminologie-Abfragen. Wird von der MCP Bridge und anderen Services genutzt.
 - **Port 3002 (MCP SSE)**: Server-Sent Events Endpunkt fuer das Model Context Protocol. Wird von Claude Code und anderen MCP-Clients genutzt.
 
-### Unterstuetzte CodeSysteme
+### Unterstuetzte CodeSysteme nach Quelle
 
-| CodeSystem | Quelle | URL |
-|-----------|--------|-----|
-| SNOMED CT | Snowstorm (lokal) | `http://snomed.info/sct` |
-| LOINC | Lokale Dateien | `http://loinc.org` |
-| ICD-10-GM | MII OntoServer (mTLS) | `http://fhir.de/CodeSystem/bfarm/icd-10-gm` |
-| OPS | MII OntoServer (mTLS) | `http://fhir.de/CodeSystem/bfarm/ops` |
-| ATC | MII OntoServer (mTLS) | `http://fhir.de/CodeSystem/bfarm/atc` |
+Der Terminology MCP Server buendelt drei verschiedene Terminologie-Quellen in einer einheitlichen Schnittstelle. Die Quelle bestimmt Verfuegbarkeit, Latenz und Konfigurationsaufwand.
+
+#### Lokal: Snowstorm (eigener FHIR TermServer)
+
+| CodeSystem | URL | Zugang |
+|-----------|-----|--------|
+| SNOMED CT | `http://snomed.info/sct` | FHIR R4 API via Snowstorm (Elasticsearch) |
+
+- **Betrieb**: Eigener Container (`ceir-snowstorm`), benoetigt Elasticsearch und SNOMED-RF2-Import
+- **Lizenz**: SNOMED CT Affiliate License via [MLDS](https://mlds.ihtsdotools.org/)
+- **Latenz**: Niedrig (lokales Netzwerk)
+- **Offline-faehig**: Ja
+
+#### Lokal: Dateibasiert (vorindexiert)
+
+| CodeSystem | URL | Zugang |
+|-----------|-----|--------|
+| LOINC | `http://loinc.org` | Lokale JSON-Indizes + LOINC-Linguistik-Dateien |
+
+- **Betrieb**: Dateien werden beim Containerstart aus `LOINC_PATH` geladen
+- **Lizenz**: [Regenstrief LOINC License](https://loinc.org/license/) (kostenlos nach Registrierung)
+- **Besonderheit**: Deutsche Labels, Panels, Answer Lists — kein externer Server noetig
+- **Latenz**: Sehr niedrig (In-Memory)
+- **Offline-faehig**: Ja
+
+#### Remote: MII OntoServer (mTLS-gesichert)
+
+| CodeSystem | URL | Zugang |
+|-----------|-----|--------|
+| ICD-10-GM | `http://fhir.de/CodeSystem/bfarm/icd-10-gm` | FHIR R4 API via MII Terminologieserver |
+| OPS | `http://fhir.de/CodeSystem/bfarm/ops` | FHIR R4 API via MII Terminologieserver |
+| ATC | `http://fhir.de/CodeSystem/bfarm/atc` | FHIR R4 API via MII Terminologieserver |
+
+- **Betrieb**: Externer Server der Medizininformatik-Initiative, Zugang ueber mutual TLS (mTLS)
+- **Lizenz**: BfArM-Terminologien, Zugang ueber MII-Mitgliedschaft
+- **Besonderheit**: Versionsuebergreifende Suche (z.B. ICD-10-GM 2009–2025)
+- **Latenz**: Mittel (Netzwerk-Roundtrip)
+- **Offline-faehig**: Nein — erfordert Netzwerkverbindung und gueltige Zertifikate
 
 ### Routing-Logik
 
 Der Terminology MCP Server routet Anfragen automatisch an die richtige Quelle:
 
-- **SNOMED CT**: Weiterleitung an Snowstorm (`http://snowstorm:8080/fhir`)
-- **ICD-10-GM, OPS, ATC**: Weiterleitung an den MII OntoServer via mTLS
-- **LOINC**: Lokale Suche in vorindexierten Dateien (deutsche Labels, Panels, Answer Lists)
+```
+Anfrage ──► system URL erkennen
+            ├── snomed.info/sct     ──► Snowstorm (lokal, Port 8080)
+            ├── loinc.org           ──► Lokale Dateien (In-Memory)
+            └── fhir.de/CodeSystem/ ──► MII OntoServer (mTLS, remote)
+```
 
 ### MII OntoServer Anbindung
 

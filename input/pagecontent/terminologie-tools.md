@@ -2,16 +2,23 @@ Diese Seite beschreibt alle 8 Tools des Terminology MCP Servers mit Parametern, 
 
 ### Tool-Uebersicht
 
-| Nr. | Tool | Beschreibung |
-|-----|------|-------------|
-| 1 | `validate_code` | Code in einem CodeSystem validieren |
-| 2 | `lookup_code` | Details fuer einen bekannten Code abrufen |
-| 3 | `search_common_loinc` | Schnelle lokale LOINC-Suche mit deutschen Labels |
-| 4 | `get_german_label` | Deutsche LOINC-Uebersetzung |
-| 5 | `search_across_versions` | Versionuebergreifende Suche (ICD-10-GM, OPS, ATC) |
-| 6 | `list_panels` | LOINC-Panels auflisten |
-| 7 | `get_panel_components` | Panel-Komponenten abrufen |
-| 8 | `lookup_loinc_answer_code` | LOINC Answer Codes nachschlagen |
+Die 8 Tools nutzen unterschiedliche Terminologie-Quellen (siehe [Terminology MCP Server](terminologie-mcp.html) fuer Details):
+
+| Nr. | Tool | Quelle | Beschreibung |
+|-----|------|--------|-------------|
+| 1 | `validate_code` | Snowstorm / MII / Lokal | Code in einem CodeSystem validieren |
+| 2 | `lookup_code` | Snowstorm / MII / Lokal | Details fuer einen bekannten Code abrufen |
+| 3 | `search_common_loinc` | Lokal (Dateien) | Schnelle lokale LOINC-Suche mit deutschen Labels |
+| 4 | `get_german_label` | Lokal (Dateien) | Deutsche LOINC-Uebersetzung |
+| 5 | `search_across_versions` | Remote (MII OntoServer) | Versionuebergreifende Suche (ICD-10-GM, OPS, ATC) |
+| 6 | `list_panels` | Lokal (Dateien) | LOINC-Panels auflisten |
+| 7 | `get_panel_components` | Lokal (Dateien) | Panel-Komponenten abrufen |
+| 8 | `lookup_loinc_answer_code` | Lokal (Dateien) | LOINC Answer Codes nachschlagen |
+
+**Legende Quellen:**
+- **Snowstorm** = Lokaler SNOMED CT FHIR Server (eigener Container)
+- **Lokal (Dateien)** = Vorindexierte LOINC-Daten im Container (offline-faehig)
+- **Remote (MII OntoServer)** = Externer Server der Medizininformatik-Initiative (mTLS, Netzwerk erforderlich)
 
 ---
 
