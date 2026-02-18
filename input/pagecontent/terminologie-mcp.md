@@ -21,7 +21,7 @@ Die folgende Tabelle zeigt alle über CEIR-OS verfügbaren CodeSystems mit der e
 | CodeSystem | `system`-URL (für FHIR) | Quelle | Versionen | Offline |
 |-----------|------------------------|--------|-----------|---------|
 | SNOMED CT | `http://snomed.info/sct` | Snowstorm (lokal) | International 2025-12, DE + CH Editionen | Ja |
-| LOINC | `http://loinc.org` | Lokale Dateien | ~20.000 häufige Codes + deutsche Labels | Ja |
+| LOINC | `http://loinc.org` | MII OntoServer (Haupttabelle) + Terminology MCP (vollständig, lokal) | OntoServer: v2.77–2.80; lokal: komplette Distribution + deutsche Labels, Panels, Answer Lists | Ja (lokal) |
 | ICD-10-GM | `http://fhir.de/CodeSystem/bfarm/icd-10-gm` | MII OntoServer (remote) | 2009–2025 (17 Versionen) | Nein |
 | OPS | `http://fhir.de/CodeSystem/bfarm/ops` | MII OntoServer (remote) | Mehrere Jahresversionen | Nein |
 | ATC | `http://fhir.de/CodeSystem/bfarm/atc` | MII OntoServer (remote) | Mehrere Jahresversionen | Nein |
@@ -62,13 +62,15 @@ Der Terminology MCP Server bündelt drei verschiedene Terminologie-Quellen in ei
 
 | CodeSystem | URL | Zugang |
 |-----------|-----|--------|
-| LOINC | `http://loinc.org` | Lokale JSON-Indizes + LOINC-Linguistik-Dateien |
+| LOINC | `http://loinc.org` | Komplette LOINC-Distribution lokal im Terminology MCP |
 
-- **Betrieb**: Dateien werden beim Containerstart aus `LOINC_PATH` geladen
+- **Betrieb**: Die vollständige LOINC-Distribution wird beim Containerstart aus `LOINC_PATH` geladen
 - **Lizenz**: [Regenstrief LOINC License](https://loinc.org/license/) (kostenlos nach Registrierung)
-- **Besonderheit**: Deutsche Labels, Panels, Answer Lists — kein externer Server nötig
+- **Umfang**: Komplettes LOINC mit deutschen Übersetzungen (soweit vorhanden), Panels und Answer Lists — deutlich mehr als die LOINC-Haupttabelle auf dem MII OntoServer
 - **Latenz**: Sehr niedrig (In-Memory)
 - **Offline-fähig**: Ja
+
+> **Hinweis:** Auf dem MII OntoServer liegt nur die LOINC-Haupttabelle als CodeSystem (Versionen 2.77–2.80). Der Terminology MCP hat dagegen die komplette LOINC-Distribution lokal hinterlegt und bietet darüber Zugang zu den deutschen Übersetzungen (`get_german_label`), Panels (`list_panels`, `get_panel_components`) und Answer Lists (`lookup_loinc_answer_code`). Für LOINC-Abfragen sind die lokalen Tools daher immer vorzuziehen.
 
 #### Remote: MII OntoServer (mTLS-gesichert)
 
