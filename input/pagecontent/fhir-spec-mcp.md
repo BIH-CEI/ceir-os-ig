@@ -1,6 +1,6 @@
-Der FHIR Spezifikations-Navigator ermoeglicht den MCP-basierten Zugriff auf die FHIR R4 Spezifikation (v4.0.1). Er dient dazu, Ressourcen-Definitionen nachzuschlagen, Kardinalitaeten zu pruefen und FHIR-Datentypen zu erkunden.
+Der FHIR Spezifikations-Navigator ermöglicht den MCP-basierten Zugriff auf die FHIR R4 Spezifikation (v4.0.1). Er dient dazu, Ressourcen-Definitionen nachzuschlagen, Kardinalitäten zu prüfen und FHIR-Datentypen zu erkunden.
 
-### Uebersicht
+### Übersicht
 
 | Eigenschaft | Wert |
 |------------|------|
@@ -9,58 +9,134 @@ Der FHIR Spezifikations-Navigator ermoeglicht den MCP-basierten Zugriff auf die 
 | Image | `ghcr.io/BIH-CEI/fhir-spec-mcp:latest` |
 | FHIR-Version | 4.0.1 (R4) |
 | Protokoll | MCP (SSE) |
+| Repository | [github.com/BIH-CEI/fhir-spec-mcp](https://github.com/BIH-CEI/fhir-spec-mcp) |
 
 ### Funktionsweise
 
-Der FHIR Spec MCP Server laedt die FHIR R4 Spezifikation beim Start und stellt sie ueber MCP-Tools bereit. Abfragen koennen sowohl ueber Claude Code als auch ueber die MCP Bridge (und damit OpenWebUI) genutzt werden.
+Der Server nutzt das FHIR R4 Package (`hl7.fhir.r4.core#4.0.1`) aus dem lokalen FHIR-Package-Cache (`~/.fhir/packages`). Dieser Cache wird automatisch befüllt, wenn lokal SUSHI oder das FHIR Terminal genutzt wurde. Das Volume `fhir-packages` mountet diesen Cache in den Container.
 
-Die Spezifikationsdaten werden in zwei persistenten Volumes gecacht:
-- `fhir-cache`: Cache der FHIR-Spezifikationsdaten
-- `fhir-packages`: FHIR-Paket-Cache
+Die Daten liegen in zwei persistenten Volumes:
+- `fhir-packages`: FHIR-Package-Cache (aus `~/.fhir/packages`)
+- `fhir-cache`: Geparste Spezifikationsdaten für schnellen Zugriff
 
-### Verfuegbare Tools
+> **Voraussetzung:** Auf dem Host muss mindestens einmal `sushi` oder das FHIR Terminal gelaufen sein, damit `hl7.fhir.r4.core#4.0.1` im Package-Cache liegt.
 
-#### get_resource_definition
+Abfragen können sowohl über Claude Code als auch über die MCP Bridge (und damit OpenWebUI) genutzt werden.
 
-Liefert die vollstaendige Definition einer FHIR-Ressource inklusive aller Elemente, Kardinalitaeten und Datentypen.
+### Verfügbare Tools
 
-**Parameter:**
+#### list_resources
 
-| Parameter | Typ | Beschreibung |
-|-----------|-----|-------------|
-| `resource_name` | string | Name der FHIR-Ressource (z.B. `Patient`, `Observation`, `Condition`) |
-
-**Beispiel:**
-
-```
-get_resource_definition(resource_name="Observation")
-```
-
-Liefert die Struktur-Definition fuer Observation mit allen Elementen wie `status`, `code`, `value[x]`, `subject`, `effectiveDateTime` etc.
-
-#### search_fhir_spec
-
-Durchsucht die FHIR-Spezifikation nach Begriffen.
+Listet verfügbare FHIR-Ressourcen, Datentypen oder Extensions auf.
 
 **Parameter:**
 
 | Parameter | Typ | Beschreibung |
 |-----------|-----|-------------|
-| `query` | string | Suchbegriff (z.B. `blood pressure`, `medication`, `allergy`) |
+| `kind` | string | Art der Ressourcen (`resource`, `datatype`, `extension`) |
 
-**Beispiel:**
+#### get_elements
 
-```
-search_fhir_spec(query="vital signs")
-```
+Liefert alle Elemente einer Ressource mit Kardinalität, Typen und Beschreibungen.
 
-### Anwendungsfaelle
+**Parameter:**
+
+| Parameter | Typ | Beschreibung |
+|-----------|-----|-------------|
+| `resource` | string | Name der FHIR-Ressource (z.B. `Patient`, `Observation`) |
+| `include_inherited` | boolean | Geerbte Elemente einbeziehen |
+
+#### get_required_elements
+
+Liefert nur die Pflichtfelder (min>=1) einer Ressource.
+
+**Parameter:**
+
+| Parameter | Typ | Beschreibung |
+|-----------|-----|-------------|
+| `resource` | string | Name der FHIR-Ressource |
+
+#### get_references
+
+Liefert Elemente, die auf andere Ressourcen verweisen.
+
+**Parameter:**
+
+| Parameter | Typ | Beschreibung |
+|-----------|-----|-------------|
+| `resource` | string | Name der FHIR-Ressource |
+
+#### get_bindings
+
+Liefert Elemente mit Terminologie-Bindings (ValueSets).
+
+**Parameter:**
+
+| Parameter | Typ | Beschreibung |
+|-----------|-----|-------------|
+| `resource` | string | Name der FHIR-Ressource |
+
+#### get_element_detail
+
+Liefert detaillierte Informationen zu einem bestimmten Element.
+
+**Parameter:**
+
+| Parameter | Typ | Beschreibung |
+|-----------|-----|-------------|
+| `resource` | string | Name der FHIR-Ressource |
+| `element_path` | string | Pfad des Elements (z.B. `Observation.value[x]`) |
+
+#### get_resource_metadata
+
+Liefert Metadaten einer Ressource (Scope, Maturity, Standards-Status).
+
+**Parameter:**
+
+| Parameter | Typ | Beschreibung |
+|-----------|-----|-------------|
+| `resource` | string | Name der FHIR-Ressource |
+
+#### get_documentation
+
+Ruft die narrative Dokumentation einer Ressource von hl7.org ab.
+
+**Parameter:**
+
+| Parameter | Typ | Beschreibung |
+|-----------|-----|-------------|
+| `resource` | string | Name der FHIR-Ressource |
+| `max_length` | integer | Maximale Länge der Dokumentation |
+
+#### search_documentation
+
+Durchsucht die Dokumentation einer Ressource nach bestimmten Begriffen.
+
+**Parameter:**
+
+| Parameter | Typ | Beschreibung |
+|-----------|-----|-------------|
+| `resource` | string | Name der FHIR-Ressource |
+| `query` | string | Suchbegriff |
+
+#### compare_resources
+
+Vergleicht die Elemente zweier Ressourcen.
+
+**Parameter:**
+
+| Parameter | Typ | Beschreibung |
+|-----------|-----|-------------|
+| `resource1` | string | Name der ersten FHIR-Ressource |
+| `resource2` | string | Name der zweiten FHIR-Ressource |
+
+### Anwendungsfälle
 
 - **Ressourcen-Definitionen nachschlagen**: Welche Elemente hat eine Observation? Welche sind Pflichtfelder?
-- **Kardinalitaeten pruefen**: Ist `Observation.value[x]` verpflichtend (1..1) oder optional (0..1)?
-- **Datentypen erkunden**: Welche Choices gibt es fuer `value[x]` (valueQuantity, valueCodeableConcept, etc.)?
-- **Profil-Entwicklung**: Welche Elemente koennen in einem Profil eingeschraenkt werden?
-- **Mapping-Unterstuetzung**: Welche FHIR-Elemente passen zu einem gegebenen klinischen Konzept?
+- **Kardinalitäten prüfen**: Ist `Observation.value[x]` verpflichtend (1..1) oder optional (0..1)?
+- **Datentypen erkunden**: Welche Choices gibt es für `value[x]` (valueQuantity, valueCodeableConcept, etc.)?
+- **Profil-Entwicklung**: Welche Elemente können in einem Profil eingeschränkt werden?
+- **Mapping-Unterstützung**: Welche FHIR-Elemente passen zu einem gegebenen klinischen Konzept?
 
 ### Konfiguration
 

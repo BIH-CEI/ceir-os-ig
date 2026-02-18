@@ -22,71 +22,76 @@ cd ceir-os
 cp .env.example .env
 ```
 
-Oeffnen Sie die `.env`-Datei und passen Sie folgende Pfade an:
+Öffne die `.env`-Datei und passe folgende Pfade an:
 
 | Variable | Beschreibung | Beispiel |
 |----------|-------------|---------|
-| `SNOMED_PACKAGE_PATH` | Pfad zur SNOMED CT ZIP-Datei | `/home/user/terminologies/snomed.zip` |
-| `TERMINOLOGY_PROXY_PATH` | Pfad zum Terminology-MCP-Quellcode | `./terminology-proxy-mcp` |
+| `SNOMED_PACKAGE_PATH` | Pfad zur SNOMED CT ZIP-Datei (wird direkt gemountet) | `/home/user/terminologies/snomed.zip` |
 | `CERTS_PATH` | Verzeichnis mit mTLS-Zertifikaten | `./certs` |
 | `LOINC_PATH` | Pfad zur LOINC-Distribution | `/home/user/terminologies/Loinc_2.81` |
 | `ZOTERO_PATH` | Pfad zum Zotero Comfort Quellcode | `../../zotero_comfort/mayor/rig` |
 | `ASKMII_PATH` | Pfad zum AskMII Quellcode | `../AskMIIAnything` |
 
-### Schritt 3: SNOMED CT Paket beschaffen
+### Schritt 3: SNOMED CT ZIP-Datei einbinden
 
-SNOMED CT ist lizenzpflichtig. Sie benoetigen eine Lizenz ueber [MLDS (Member Licensing & Distribution Service)](https://mlds.ihtsdotools.org/).
+Das SNOMED CT RF2-Paket liegt intern im BIH SharePoint. Du musst es **nicht** separat beschaffen.
 
-1. Registrieren Sie sich bei MLDS
-2. Laden Sie das gewuenschte SNOMED CT RF2-Paket herunter (z.B. International Edition oder SNOMED CT German Extension)
-3. Speichern Sie die ZIP-Datei und tragen Sie den Pfad in `SNOMED_PACKAGE_PATH` ein
+1. Lade die SNOMED CT ZIP-Datei aus dem SharePoint herunter
+2. Trage den Pfad zur ZIP-Datei in `SNOMED_PACKAGE_PATH` ein — die Datei wird direkt als Volume gemountet
+3. Der SNOMED Unpacker entpackt die ZIP beim ersten Start automatisch
 
-### Schritt 4: mTLS-Zertifikate fuer MII OntoServer
+### Schritt 4: mTLS-Zertifikate für MII OntoServer
 
-Fuer den Zugriff auf ICD-10-GM, OPS und ATC ueber den MII OntoServer benoetigen Sie mTLS-Zertifikate. Es gibt zwei Optionen:
+Für den Zugriff auf ICD-10-GM, OPS und ATC über den MII OntoServer benötigst du mTLS-Zertifikate. Es gibt zwei Optionen:
 
-**Option A: Dateien im Verzeichnis**
+**Lokal: Volume-Mount (Standard)**
+
+Zertifikatsdateien werden zur Laufzeit als Read-Only-Volume in den Container gemountet — sie sind nie im Image enthalten.
 
 ```bash
 mkdir -p certs
-# Legen Sie folgende Dateien ab:
-# certs/client.pem    - Client-Zertifikat
-# certs/client.key    - Privater Schluessel
-# certs/root-ca.pem   - Root CA
-# certs/intermediate.pem - Intermediate CA
+# Lege folgende Dateien ab:
+# certs/client.pem        - Client-Zertifikat
+# certs/client.key         - Privater Schlüssel
+# certs/root-ca.pem        - Root CA
+# certs/intermediate.pem   - Intermediate CA
 ```
 
-Setzen Sie `CERT_PASSPHRASE` in der `.env`-Datei.
+Die `CERT_PASSPHRASE` direkt bei Thomas Debertshäuser erfragen und in der `.env`-Datei eintragen.
 
-**Option B: Base64-kodierte Umgebungsvariablen**
+**CI/CD: Base64-Umgebungsvariablen**
+
+In CI/CD-Pipelines (z.B. GitHub Actions) können die Zertifikate stattdessen als Base64-kodierte Umgebungsvariablen übergeben werden. Der Container dekodiert sie beim Start.
 
 ```bash
-# Zertifikate als Base64 kodieren
+# Zertifikate kodieren (einmalig)
 base64 -i client.pem | tr -d '\n'
 ```
 
-Tragen Sie die kodierten Werte in die `.env`-Datei ein:
+Die kodierten Werte werden als Secrets hinterlegt und über Umgebungsvariablen übergeben:
 - `CERT_CLIENT_PEM_B64`
 - `CERT_CLIENT_KEY_B64`
 - `CERT_ROOT_CA_B64`
 - `CERT_INTERMEDIATE_B64`
 
+> **Hinweis:** Zertifikate sind in keinem Fall im Docker-Image enthalten. Lokal werden sie per Volume gemountet, in CI/CD per Umgebungsvariable injiziert.
+
 ### Schritt 5: LOINC-Daten herunterladen
 
-1. Registrieren Sie sich bei [loinc.org](https://loinc.org/downloads/)
-2. Laden Sie die LOINC-Distribution herunter (z.B. `Loinc_2.81`)
-3. Entpacken Sie das Archiv und tragen Sie den Pfad in `LOINC_PATH` ein
+1. Registriere dich bei [loinc.org](https://loinc.org/downloads/)
+2. Lade die LOINC-Distribution herunter (z.B. `Loinc_2.81`)
+3. Entpacke das Archiv und trage den Pfad in `LOINC_PATH` ein
 
-Die LOINC-Daten werden fuer deutsche Labels, Panel-Informationen und Answer Lists verwendet.
+Die LOINC-Daten werden für deutsche Labels, Panel-Informationen und Answer Lists verwendet.
 
 ### Schritt 6: Zotero API-Keys (optional)
 
-Wenn Sie die Zotero-Literaturverwaltung nutzen moechten:
+Wenn du die Zotero-Literaturverwaltung nutzen möchtest:
 
-1. Erstellen Sie einen API-Key unter [zotero.org/settings/keys](https://www.zotero.org/settings/keys/new)
-2. Tragen Sie die Werte in der `.env` ein:
-   - `ZOTERO_GROUP_API_KEY` - fuer die Gruppen-Bibliothek
-   - `ZOTERO_PERSONAL_API_KEY` - fuer die persoenliche Bibliothek (optional)
+1. Erstelle einen API-Key unter [zotero.org/settings/keys](https://www.zotero.org/settings/keys/new)
+2. Trage die Werte in der `.env` ein:
+   - `ZOTERO_GROUP_API_KEY` - für die Gruppen-Bibliothek
+   - `ZOTERO_PERSONAL_API_KEY` - für die persönliche Bibliothek (optional)
 
 ### Schritt 7: Stack starten
 
@@ -99,20 +104,20 @@ Beim ersten Start passiert automatisch:
 1. **Elasticsearch** startet und wird als healthy gemeldet
 2. **SNOMED Unpacker** entpackt das SNOMED-Paket in das `sct_files`-Volume
 3. **Snowstorm** startet und wartet auf Elasticsearch
-4. **SNOMED Importer** laedt die SNOMED-Daten ueber die Snowstorm-API (kann 10-30 Minuten dauern)
+4. **SNOMED Importer** lädt die SNOMED-Daten über die Snowstorm-API (kann 10-30 Minuten dauern)
 5. **SNOMED Browser** wird gestartet, nachdem der Import abgeschlossen ist
-6. **Ollama Init** laedt das Standard-Modell `qwen2.5:7b` herunter
+6. **Ollama Init** lädt das Standard-Modell `qwen2.5:7b` herunter
 7. Alle weiteren Services starten parallel
 
 ### Schritt 8: Verifizierung
 
-Pruefen Sie den Status aller Services:
+Prüfe den Status aller Services:
 
 ```bash
 docker compose ps
 ```
 
-Health-Checks fuer einzelne Services:
+Health-Checks für einzelne Services:
 
 ```bash
 # Elasticsearch
@@ -142,15 +147,15 @@ curl -s http://localhost:3080
 
 ### Elasticsearch-Speicher anpassen
 
-Je nach Groesse des SNOMED-Pakets muss der Elasticsearch-Speicher angepasst werden:
+Je nach Größe des SNOMED-Pakets muss der Elasticsearch-Speicher angepasst werden:
 
-| Paketgroesse | ES_JAVA_OPTS |
+| Paketgröße | ES_JAVA_OPTS |
 |-------------|-------------|
 | Klein (< 500 MB) | `-Xms1g -Xmx1g` |
 | Mittel (500 MB - 2 GB) | `-Xms2g -Xmx2g` |
-| Gross (> 2 GB) | `-Xms4g -Xmx4g` |
+| Groß (> 2 GB) | `-Xms4g -Xmx4g` |
 
-Setzen Sie den Wert in der `.env`-Datei:
+Setze den Wert in der `.env`-Datei:
 
 ```env
 ES_JAVA_OPTS="-Xms2g -Xmx2g"

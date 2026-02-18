@@ -1,6 +1,6 @@
-Zotero Comfort ist ein MCP-Server fuer die Literaturverwaltung in CEIR-OS. Er bietet Dual-Library-Unterstuetzung (Gruppen- und persoenliche Bibliothek), PubMed- und arXiv-Integration sowie Tools fuer die Publikationsverwaltung.
+Zotero Comfort ist ein MCP-Server für die Literaturverwaltung in CEIR-OS. Er bietet Dual-Library-Unterstützung (Gruppen- und persönliche Bibliothek), PubMed- und arXiv-Integration sowie Tools für die Publikationsverwaltung.
 
-### Uebersicht
+### Übersicht
 
 | Eigenschaft | Wert |
 |------------|------|
@@ -11,14 +11,14 @@ Zotero Comfort ist ein MCP-Server fuer die Literaturverwaltung in CEIR-OS. Er bi
 
 ### Dual-Library-Konzept
 
-Zotero Comfort unterstuetzt zwei Bibliotheken gleichzeitig:
+Zotero Comfort unterstützt zwei Bibliotheken gleichzeitig:
 
 | Bibliothek | Zweck | Konfiguration |
 |-----------|-------|--------------|
 | **Group Library** (CEI_Publications) | Geteilte Team-Bibliothek | `ZOTERO_GROUP_API_KEY`, `ZOTERO_GROUP_LIBRARY_ID` |
 | **Personal Library** (optional) | Individuelle Sammlung | `ZOTERO_PERSONAL_API_KEY`, `ZOTERO_PERSONAL_LIBRARY_ID` |
 
-### Verfuegbare Tools
+### Verfügbare Tools
 
 #### search_papers
 
@@ -39,7 +39,7 @@ Ruft die Metadaten eines bestimmten Papers ab (Titel, Autoren, Abstract, DOI, et
 
 #### suggest_collection
 
-Schlaegt eine passende Sammlung (Collection) fuer ein Paper vor, basierend auf Inhalt und vorhandenen Sammlungen.
+Schlägt eine passende Sammlung (Collection) für ein Paper vor, basierend auf Inhalt und vorhandenen Sammlungen.
 
 | Parameter | Typ | Beschreibung |
 |-----------|-----|-------------|
@@ -47,7 +47,7 @@ Schlaegt eine passende Sammlung (Collection) fuer ein Paper vor, basierend auf I
 
 #### list_collections
 
-Listet alle verfuegbaren Sammlungen in der Bibliothek auf.
+Listet alle verfügbaren Sammlungen in der Bibliothek auf.
 
 | Parameter | Typ | Beschreibung |
 |-----------|-----|-------------|
@@ -64,7 +64,7 @@ Erstellt eine thematische Leseliste aus vorhandenen Papers.
 
 #### tag_ready_for_website
 
-Markiert ein Paper fuer die Veroeffentlichung auf der Website.
+Markiert ein Paper für die Veröffentlichung auf der Website.
 
 | Parameter | Typ | Beschreibung |
 |-----------|-----|-------------|
@@ -80,7 +80,7 @@ Exportiert eine Sammlung als BibTeX-Datei.
 
 ### PubMed und arXiv Integration
 
-Zotero Comfort kann Literatur direkt aus PubMed und arXiv suchen und in die Bibliothek importieren. Dies ermoeglicht einen integrierten Workflow von der Literaturrecherche bis zur Verwaltung.
+Zotero Comfort kann Literatur direkt aus PubMed und arXiv suchen und in die Bibliothek importieren. Dies ermöglicht einen integrierten Workflow von der Literaturrecherche bis zur Verwaltung.
 
 ### Konfiguration
 
@@ -88,14 +88,14 @@ Zotero Comfort kann Literatur direkt aus PubMed und arXiv suchen und in die Bibl
 |-------------------|---------|-------------|
 | `ZOTERO_MCP_PORT` | `3001` | Host-Port |
 | `ZOTERO_GROUP_LIBRARY_ID` | `5767153` | Gruppen-Bibliothek ID |
-| `ZOTERO_GROUP_API_KEY` | - | API-Key fuer Gruppen-Bibliothek |
-| `ZOTERO_PERSONAL_LIBRARY_ID` | - | Persoenliche Bibliothek ID |
-| `ZOTERO_PERSONAL_API_KEY` | - | API-Key fuer persoenliche Bibliothek |
+| `ZOTERO_GROUP_API_KEY` | - | API-Key für Gruppen-Bibliothek |
+| `ZOTERO_PERSONAL_LIBRARY_ID` | - | Persönliche Bibliothek ID |
+| `ZOTERO_PERSONAL_API_KEY` | - | API-Key für persönliche Bibliothek |
 | `LOG_LEVEL` | `info` | Log-Level |
 
 ### API-Keys erstellen
 
-1. Gehen Sie zu [zotero.org/settings/keys/new](https://www.zotero.org/settings/keys/new)
-2. Erstellen Sie einen Key mit Lesezugriff auf die gewuenschte Bibliothek
-3. Fuer die Gruppen-Bibliothek: Stellen Sie sicher, dass der Key Zugriff auf die Gruppe `CEI_Publications` hat
-4. Tragen Sie die Keys in die `.env`-Datei ein
+1. Gehe zu [zotero.org/settings/keys/new](https://www.zotero.org/settings/keys/new)
+2. Erstelle einen Key mit Lesezugriff auf die gewünschte Bibliothek
+3. Für die Gruppen-Bibliothek: Stelle sicher, dass der Key Zugriff auf die Gruppe `CEI_Publications` hat
+4. Trage die Keys in die `.env`-Datei ein

@@ -1,6 +1,6 @@
-Snowstorm ist der SNOMED CT Terminologieserver in CEIR-OS. Er stellt eine vollstaendige FHIR R4-konforme Schnittstelle fuer SNOMED CT bereit.
+Snowstorm ist der SNOMED CT Terminologieserver in CEIR-OS. Er stellt eine vollständige FHIR R4-konforme Schnittstelle für SNOMED CT bereit.
 
-### Uebersicht
+### Übersicht
 
 | Eigenschaft | Wert |
 |------------|------|
@@ -16,13 +16,13 @@ Snowstorm stellt folgende FHIR-Operationen bereit:
 
 #### CodeSystem/$lookup
 
-Details fuer einen bekannten SNOMED CT Code abrufen:
+Details für einen bekannten SNOMED CT Code abrufen:
 
 ```bash
 curl -s "http://localhost:8090/fhir/CodeSystem/\$lookup?system=http://snomed.info/sct&code=84114007" | jq .
 ```
 
-Antwort (gekuerzt):
+Antwort (gekürzt):
 
 ```json
 {
@@ -48,7 +48,7 @@ curl -s "http://localhost:8090/fhir/ValueSet/\$expand?url=http://snomed.info/sct
 
 #### ConceptMap/$translate
 
-Code-Uebersetzungen zwischen Terminologien:
+Code-Übersetzungen zwischen Terminologien:
 
 ```bash
 curl -s "http://localhost:8090/fhir/ConceptMap/\$translate?system=http://snomed.info/sct&code=84114007&targetSystem=http://hl7.org/fhir/sid/icd-10" | jq .
@@ -56,7 +56,7 @@ curl -s "http://localhost:8090/fhir/ConceptMap/\$translate?system=http://snomed.
 
 ### Expression Constraint Language (ECL)
 
-Snowstorm unterstuetzt die SNOMED CT Expression Constraint Language fuer komplexe Abfragen:
+Snowstorm unterstützt die SNOMED CT Expression Constraint Language für komplexe Abfragen:
 
 | ECL-Ausdruck | Bedeutung |
 |-------------|-----------|
@@ -74,7 +74,7 @@ curl -s "http://localhost:8090/fhir/ValueSet/\$expand?url=http://snomed.info/sct
 
 ### SNOMED CT Browser
 
-Der SNOMED CT Browser bietet eine grafische Oberflaeche zur Exploration der Terminologie:
+Der SNOMED CT Browser bietet eine grafische Oberfläche zur Exploration der Terminologie:
 
 | Eigenschaft | Wert |
 |------------|------|
@@ -82,16 +82,24 @@ Der SNOMED CT Browser bietet eine grafische Oberflaeche zur Exploration der Term
 | Port | 4000 |
 | Image | `snomedinternational/snomedct-browser:latest` |
 
-Oeffnen Sie `http://localhost:4000` im Browser, um SNOMED CT Konzepte zu suchen, Hierarchien zu navigieren und Beziehungen zu erkunden.
+Öffne `http://localhost:4000` im Browser, um SNOMED CT Konzepte zu suchen, Hierarchien zu navigieren und Beziehungen zu erkunden.
 
-### SNOMED CT Import
+### SNOMED CT Daten
 
-Der Import erfolgt beim ersten Start automatisch ueber zwei Init-Container:
+Die SNOMED CT ZIP-Datei liegt intern im BIH SharePoint und wird direkt als Volume in den Container gemountet.
 
-1. **snomed-unpacker**: Entpackt das SNOMED-Paket (ZIP) in das `sct_files`-Volume
-2. **snomed-importer**: Laedt die RF2-Dateien ueber die Snowstorm REST API
+**Lokal:** Die ZIP-Datei wird über `SNOMED_PACKAGE_PATH` in der `.env` referenziert. Beim ersten Start entpackt der `snomed-unpacker`-Container die Datei automatisch in das `sct_files`-Volume.
 
-Der Importvorgang kann je nach Paketgroesse 10-30 Minuten dauern. Der Fortschritt kann ueber die Logs verfolgt werden:
+**CI/CD:** In Pipelines kann die ZIP-Datei als Build-Artefakt oder über einen vorbereiteten Volume-Mount bereitgestellt werden.
+
+### Import-Ablauf
+
+Der Import erfolgt beim ersten Start automatisch über zwei Init-Container:
+
+1. **snomed-unpacker**: Entpackt die gemountete ZIP in das `sct_files`-Volume
+2. **snomed-importer**: Lädt die RF2-Dateien über die Snowstorm REST API
+
+Der Importvorgang kann je nach Paketgröße 10-30 Minuten dauern:
 
 ```bash
 # Unpacker-Fortschritt
@@ -101,7 +109,7 @@ docker logs ceir-snomed-unpacker
 docker logs -f ceir-snomed-importer
 ```
 
-Nach erfolgreichem Import wird eine Marker-Datei (`.unpacked`) im Volume angelegt. Bei einem Neustart wird der Import uebersprungen.
+Nach erfolgreichem Import wird eine Marker-Datei (`.unpacked`) im Volume angelegt. Bei einem Neustart wird der Import übersprungen.
 
 ### REST API Beispiele
 
@@ -127,7 +135,7 @@ curl -s "http://localhost:8090/browser/MAIN/concepts/84114007/descriptions" | jq
 
 | Umgebungsvariable | Standard | Beschreibung |
 |-------------------|---------|-------------|
-| `SNOWSTORM_PORT` | `8090` | Host-Port fuer Snowstorm |
+| `SNOWSTORM_PORT` | `8090` | Host-Port für Snowstorm |
 | `ES_JAVA_OPTS` | `-Xms1g -Xmx1g` | Elasticsearch-Speicher |
 
-Snowstorm ist im Schreibmodus konfiguriert (`snowstorm.rest.api.readonly=false`), um den initialen Import zu ermoeglichen. Fuer Produktionsumgebungen sollte der Lesemodus aktiviert werden.
+Snowstorm ist im Schreibmodus konfiguriert (`snowstorm.rest.api.readonly=false`), um den initialen Import zu ermöglichen. Für Produktionsumgebungen sollte der Lesemodus aktiviert werden.

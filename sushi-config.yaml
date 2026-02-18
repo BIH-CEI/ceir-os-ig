@@ -46,6 +46,8 @@ pages:
     title: Terminologie-Tools
   fhir-mappings.md:
     title: FHIR Mappings
+  babelfsh.md:
+    title: BabelFSH
   troubleshooting.md:
     title: Fehlerbehebung
 
@@ -64,5 +66,6 @@ menu:
   Anleitungen:
     Tools: terminologie-tools.html
     Mappings: fhir-mappings.html
+    BabelFSH: babelfsh.html
     Fehlerbehebung: troubleshooting.html
   Artifacts: artifacts.html

@@ -1,4 +1,4 @@
-Diese Seite beschreibt haeufige Probleme beim Betrieb von CEIR-OS und deren Loesungen.
+Diese Seite beschreibt häufige Probleme beim Betrieb von CEIR-OS und deren Lösungen.
 
 ### Snowstorm startet nicht
 
@@ -7,11 +7,11 @@ Diese Seite beschreibt haeufige Probleme beim Betrieb von CEIR-OS und deren Loes
 **Ursache 1: Elasticsearch hat nicht genug Speicher**
 
 ```bash
-# Elasticsearch-Logs pruefen
+# Elasticsearch-Logs prüfen
 docker logs ceir-elasticsearch 2>&1 | tail -20
 ```
 
-Loesung: `ES_JAVA_OPTS` in der `.env` anpassen:
+Lösung: `ES_JAVA_OPTS` in der `.env` anpassen:
 
 ```env
 ES_JAVA_OPTS="-Xms2g -Xmx2g"
@@ -26,7 +26,7 @@ docker compose up -d
 
 **Ursache 2: Elasticsearch ist noch nicht healthy**
 
-Snowstorm wartet auf den Elasticsearch Health Check. Pruefen Sie:
+Snowstorm wartet auf den Elasticsearch Health Check. Prüfe:
 
 ```bash
 curl -s http://localhost:9200/_cluster/health | jq .status
@@ -40,7 +40,7 @@ Der Status muss `green` oder `yellow` sein.
 docker logs ceir-snomed-importer
 ```
 
-Falls der Import abgebrochen wurde, loeschen Sie die Marker-Datei und starten Sie neu:
+Falls der Import abgebrochen wurde, lösche die Marker-Datei und starte neu:
 
 ```bash
 docker compose down
@@ -50,33 +50,33 @@ docker compose up -d
 
 ### SNOMED-Import dauert sehr lange
 
-Der initiale Import kann je nach Paketgroesse 10-30 Minuten dauern. Fortschritt pruefen:
+Der initiale Import kann je nach Paketgröße 10-30 Minuten dauern. Fortschritt prüfen:
 
 ```bash
 docker logs -f ceir-snomed-importer
 ```
 
-Waehrend des Imports ist Snowstorm bereits gestartet, aber noch nicht vollstaendig funktional.
+Während des Imports ist Snowstorm bereits gestartet, aber noch nicht vollständig funktional.
 
 ### MII OntoServer nicht erreichbar
 
-**Symptom:** `search_across_versions` liefert Fehler fuer ICD-10-GM, OPS oder ATC.
+**Symptom:** `search_across_versions` liefert Fehler für ICD-10-GM, OPS oder ATC.
 
-**Ursache 1: mTLS-Zertifikate fehlen oder sind ungueltig**
+**Ursache 1: mTLS-Zertifikate fehlen oder sind ungültig**
 
 ```bash
-# Terminology MCP Logs pruefen
+# Terminology MCP Logs prüfen
 docker logs ceir-terminology-mcp 2>&1 | grep -i cert
 ```
 
-Pruefen Sie:
+Prüfe:
 - Sind die Zertifikat-Dateien im `CERTS_PATH`-Verzeichnis vorhanden?
 - Ist `CERT_PASSPHRASE` korrekt gesetzt?
-- Sind die Base64-kodierten Werte (falls verwendet) vollstaendig?
+- Sind die Base64-kodierten Werte (falls verwendet) vollständig?
 
 **Ursache 2: Netzwerkprobleme**
 
-Der MII OntoServer ist ein externer Dienst. Pruefen Sie die Erreichbarkeit:
+Der MII OntoServer ist ein externer Dienst. Prüfe die Erreichbarkeit:
 
 ```bash
 docker exec ceir-terminology-mcp curl -k https://mii-termserv.de/fhir/metadata
@@ -88,7 +88,7 @@ docker exec ceir-terminology-mcp curl -k https://mii-termserv.de/fhir/metadata
 
 **Ursache 1: Ollama ist direkt verbunden (Bridge umgangen)**
 
-Pruefen Sie die OpenWebUI-Konfiguration:
+Prüfe die OpenWebUI-Konfiguration:
 
 ```bash
 docker inspect ceir-webui | jq '.[0].Config.Env' | grep -i ollama
@@ -96,7 +96,7 @@ docker inspect ceir-webui | jq '.[0].Config.Env' | grep -i ollama
 
 `ENABLE_OLLAMA_API` muss `false` sein. Wenn es `true` ist, kommuniziert OpenWebUI direkt mit Ollama und umgeht die MCP Bridge.
 
-Loesung: Stellen Sie sicher, dass in der `docker-compose.yml`:
+Lösung: Stelle sicher, dass in der `docker-compose.yml`:
 
 ```yaml
 - ENABLE_OLLAMA_API=false
@@ -110,35 +110,35 @@ Loesung: Stellen Sie sicher, dass in der `docker-compose.yml`:
 curl -s http://localhost:8000/health | jq .
 ```
 
-Wenn `tools: 0`, sind die MCP-Server nicht erreichbar. Pruefen Sie die Logs:
+Wenn `tools: 0`, sind die MCP-Server nicht erreichbar. Prüfe die Logs:
 
 ```bash
 docker logs ceir-mcp-bridge 2>&1 | grep -i discover
 ```
 
-**Ursache 3: Modell unterstuetzt kein Tool Calling**
+**Ursache 3: Modell unterstützt kein Tool Calling**
 
-Nicht alle Modelle unterstuetzen Tool Calling zuverlaessig. Empfohlene Modelle:
+Nicht alle Modelle unterstützen Tool Calling zuverlässig. Empfohlene Modelle:
 
 | Modell | Tool Calling |
 |--------|-------------|
 | `qwen2.5:7b` | Gut |
 | `qwen3:14b` | Sehr gut |
-| `llama3.1:8b` | Maessig |
+| `llama3.1:8b` | Mäßig |
 
 ### LOINC-Suche liefert keine deutschen Labels
 
-**Symptom:** `search_common_loinc` oder `get_german_label` geben keine deutschen Uebersetzungen zurueck.
+**Symptom:** `search_common_loinc` oder `get_german_label` geben keine deutschen Übersetzungen zurück.
 
 **Ursache: LOINC-Daten nicht gemountet**
 
-Pruefen Sie:
+Prüfe:
 
 ```bash
 docker exec ceir-terminology-mcp ls /app/loinc/
 ```
 
-Das Verzeichnis muss die LOINC-Distribution enthalten. Pruefen Sie den `LOINC_PATH` in der `.env`:
+Das Verzeichnis muss die LOINC-Distribution enthalten. Prüfe den `LOINC_PATH` in der `.env`:
 
 ```env
 LOINC_PATH=/pfad/zu/Loinc_2.81
@@ -148,7 +148,7 @@ LOINC_PATH=/pfad/zu/Loinc_2.81
 
 **Symptom:** Container werden mit "OOMKilled" beendet.
 
-Loesung: Docker-Ressourcen erhoehen (Docker Desktop > Settings > Resources):
+Lösung: Docker-Ressourcen erhöhen (Docker Desktop > Settings > Resources):
 
 | Ressource | Minimum | Empfohlen |
 |-----------|---------|-----------|
@@ -156,7 +156,7 @@ Loesung: Docker-Ressourcen erhoehen (Docker Desktop > Settings > Resources):
 | Festplatte | 20 GB | 50 GB |
 | CPUs | 2 | 4 |
 
-Fuer Elasticsearch spezifisch:
+Für Elasticsearch spezifisch:
 
 ```env
 ES_JAVA_OPTS="-Xms1g -Xmx1g"
@@ -166,7 +166,7 @@ ES_JAVA_OPTS="-Xms1g -Xmx1g"
 
 **Symptom:** Container startet nicht wegen "port already in use".
 
-Pruefen Sie, welcher Prozess den Port belegt:
+Prüfe, welcher Prozess den Port belegt:
 
 ```bash
 lsof -i :8090  # Snowstorm
@@ -174,7 +174,7 @@ lsof -i :3000  # Terminology MCP
 lsof -i :8000  # MCP Bridge
 ```
 
-Loesung: Aendern Sie den Port in der `.env`:
+Lösung: Ändere den Port in der `.env`:
 
 ```env
 SNOWSTORM_PORT=9090
@@ -182,9 +182,9 @@ TERMINOLOGY_PROXY_PORT=3100
 BRIDGE_PORT=8001
 ```
 
-### Health Checks fuer alle Services
+### Health Checks für alle Services
 
-Nutzen Sie folgendes Skript, um den Status aller Services zu pruefen:
+Nutze folgendes Skript, um den Status aller Services zu prüfen:
 
 ```bash
 echo "=== CEIR-OS Health Check ==="
@@ -220,7 +220,7 @@ echo -n "Zotero Comfort:   "
 curl -sf http://localhost:3001/health | jq -r .status 2>/dev/null || echo "NICHT ERREICHBAR"
 ```
 
-### Vollstaendiger Neustart
+### Vollständiger Neustart
 
 Falls nichts anderes hilft:
 
@@ -228,7 +228,7 @@ Falls nichts anderes hilft:
 # Alle Container stoppen und entfernen
 docker compose down
 
-# Optional: Volumes loeschen (ACHTUNG: SNOMED-Import muss wiederholt werden!)
+# Optional: Volumes löschen (ACHTUNG: SNOMED-Import muss wiederholt werden!)
 docker compose down -v
 
 # Neu starten

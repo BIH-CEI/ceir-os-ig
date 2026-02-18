@@ -1,6 +1,6 @@
-Die MCP-OpenAI Bridge verbindet lokale LLMs mit den MCP-Tools von CEIR-OS. Sie uebersetzt MCP-Tool-Definitionen in das OpenAI Function Calling Format und fuehrt Tool-Aufrufe automatisch aus.
+Die MCP-OpenAI Bridge verbindet lokale LLMs mit den MCP-Tools von CEIR-OS. Sie übersetzt MCP-Tool-Definitionen in das OpenAI Function Calling Format und führt Tool-Aufrufe automatisch aus.
 
-### Uebersicht
+### Übersicht
 
 | Eigenschaft | Wert |
 |------------|------|
@@ -13,9 +13,9 @@ Die MCP-OpenAI Bridge verbindet lokale LLMs mit den MCP-Tools von CEIR-OS. Sie u
 
 | Endpunkt | Methode | Beschreibung |
 |----------|---------|-------------|
-| `/v1/chat/completions` | POST | Chat-Completions mit Tool-Unterstuetzung |
-| `/v1/models` | GET | Verfuegbare Modelle (Proxy zu Ollama) |
-| `/v1/tools` | GET | Verfuegbare Tools auflisten |
+| `/v1/chat/completions` | POST | Chat-Completions mit Tool-Unterstützung |
+| `/v1/models` | GET | Verfügbare Modelle (Proxy zu Ollama) |
+| `/v1/tools` | GET | Verfügbare Tools auflisten |
 | `/health` | GET | Health Check |
 
 ### Dynamische Tool-Discovery
@@ -30,16 +30,16 @@ Beim Start fragt die Bridge alle konfigurierten MCP-Server nach ihren Tools ab:
 
 Die entdeckten Tools werden in das OpenAI Function Format konvertiert und bei jedem Chat-Request an Ollama mitgegeben.
 
-Falls die Discovery fehlschlaegt, werden Fallback-Tools verwendet (lookup_code, search_common_loinc, get_german_label, search_across_versions).
+Falls die Discovery fehlschlägt, werden Fallback-Tools verwendet (lookup_code, search_common_loinc, get_german_label, search_across_versions).
 
 ### Ausgeschlossene Tools
 
-Folgende Tools werden bei der Discovery uebersprungen:
+Folgende Tools werden bei der Discovery übersprungen:
 
 | Tool | Grund |
 |------|-------|
 | `search_codes` | Probleme mit ICD-10-GM |
-| `validate_biomedical_identifier` | Nicht relevant fuer typische Abfragen |
+| `validate_biomedical_identifier` | Nicht relevant für typische Abfragen |
 
 ### Smart Search Retry
 
@@ -53,7 +53,7 @@ Dies kompensiert das Problem, dass lokale LLMs oft zu spezifische Suchbegriffe g
 
 ### Tool Call Parser
 
-Lokale LLMs erzeugen Tool-Aufrufe nicht immer im nativen Format. Die Bridge unterstuetzt drei Formate:
+Lokale LLMs erzeugen Tool-Aufrufe nicht immer im nativen Format. Die Bridge unterstützt drei Formate:
 
 #### 1. Natives Ollama Format (bevorzugt)
 
@@ -71,24 +71,24 @@ Das LLM nutzt die `tools`-Eigenschaft der Ollama-API direkt.
 🔧 lookup_code(system=http://snomed.info/sct, code=84114007)
 ```
 
-Die Bridge erkennt diese Formate automatisch, extrahiert die Tool-Aufrufe, fuehrt sie aus und entfernt die Formatierung aus der Antwort.
+Die Bridge erkennt diese Formate automatisch, extrahiert die Tool-Aufrufe, führt sie aus und entfernt die Formatierung aus der Antwort.
 
 ### Result Trimming
 
-Um Context-Overflow bei lokalen LLMs zu vermeiden, werden Tool-Ergebnisse gekuerzt:
+Um Context-Overflow bei lokalen LLMs zu vermeiden, werden Tool-Ergebnisse gekürzt:
 
 | Regel | Wert |
 |-------|------|
-| Maximale Ergebnisgroesse | 4000 Zeichen |
+| Maximale Ergebnisgröße | 4000 Zeichen |
 | `search_across_versions` | Nur neueste Version + max. 10 Codes |
-| Generisches Trimming | Abschneiden bei Ueberschreitung des Limits |
+| Generisches Trimming | Abschneiden bei Überschreitung des Limits |
 
 ### System-Prompt
 
 Die Bridge generiert automatisch einen System-Prompt, der:
 
-- Alle verfuegbaren Tools auflistet
-- Suchstrategien vorgibt (kurze Suchbegriffe, Hauptwoerter bevorzugen)
+- Alle verfügbaren Tools auflistet
+- Suchstrategien vorgibt (kurze Suchbegriffe, Hauptwörter bevorzugen)
 - Das LLM anweist, immer ein Tool aufzurufen bevor es antwortet
 - Das Raten oder Erfinden von Codes verbietet
 
@@ -101,7 +101,7 @@ Die Bridge generiert automatisch einen System-Prompt, der:
 | `TERMINOLOGY_URL` | `http://terminology-mcp:3000` | Terminology MCP URL |
 | `ASKMII_URL` | `http://ask-mii:2026` | AskMII URL |
 
-**Hinweis zu `OLLAMA_URL`**: Der Standard `host.docker.internal` ist fuer Apple-Metal-GPU-Unterstuetzung optimiert (Ollama laeuft nativ auf dem Host). Fuer Docker-Ollama (CPU) setzen Sie `OLLAMA_URL=http://ollama:11434`.
+**Hinweis zu `OLLAMA_URL`**: Der Standard `host.docker.internal` ist für Apple-Metal-GPU-Unterstützung optimiert (Ollama läuft nativ auf dem Host). Für Docker-Ollama (CPU) setze `OLLAMA_URL=http://ollama:11434`.
 
 ### Health Check
 

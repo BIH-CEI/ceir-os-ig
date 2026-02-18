@@ -1,6 +1,6 @@
-Der Terminology MCP Server ist der zentrale Terminologie-Zugang in CEIR-OS. Er buendelt den Zugriff auf mehrere Terminologie-Quellen in einer einheitlichen Schnittstelle.
+Der Terminology MCP Server ist der zentrale Terminologie-Zugang in CEIR-OS. Er bündelt den Zugriff auf mehrere Terminologie-Quellen in einer einheitlichen Schnittstelle.
 
-### Uebersicht
+### Übersicht
 
 | Eigenschaft | Wert |
 |------------|------|
@@ -11,12 +11,12 @@ Der Terminology MCP Server ist der zentrale Terminologie-Zugang in CEIR-OS. Er b
 
 Der Server stellt **zwei Schnittstellen** bereit:
 
-- **Port 3000 (HTTP REST)**: Klassische HTTP-Endpunkte fuer Terminologie-Abfragen. Wird von der MCP Bridge und anderen Services genutzt.
-- **Port 3002 (MCP SSE)**: Server-Sent Events Endpunkt fuer das Model Context Protocol. Wird von Claude Code und anderen MCP-Clients genutzt.
+- **Port 3000 (HTTP REST)**: Klassische HTTP-Endpunkte für Terminologie-Abfragen. Wird von der MCP Bridge und anderen Services genutzt.
+- **Port 3002 (MCP SSE)**: Server-Sent Events Endpunkt für das Model Context Protocol. Wird von Claude Code und anderen MCP-Clients genutzt.
 
-### Unterstuetzte CodeSysteme nach Quelle
+### Unterstützte CodeSysteme nach Quelle
 
-Der Terminology MCP Server buendelt drei verschiedene Terminologie-Quellen in einer einheitlichen Schnittstelle. Die Quelle bestimmt Verfuegbarkeit, Latenz und Konfigurationsaufwand.
+Der Terminology MCP Server bündelt drei verschiedene Terminologie-Quellen in einer einheitlichen Schnittstelle. Die Quelle bestimmt Verfügbarkeit, Latenz und Konfigurationsaufwand.
 
 #### Lokal: Snowstorm (eigener FHIR TermServer)
 
@@ -24,10 +24,10 @@ Der Terminology MCP Server buendelt drei verschiedene Terminologie-Quellen in ei
 |-----------|-----|--------|
 | SNOMED CT | `http://snomed.info/sct` | FHIR R4 API via Snowstorm (Elasticsearch) |
 
-- **Betrieb**: Eigener Container (`ceir-snowstorm`), benoetigt Elasticsearch und SNOMED-RF2-Import
-- **Lizenz**: SNOMED CT Affiliate License via [MLDS](https://mlds.ihtsdotools.org/)
+- **Betrieb**: Eigener Container (`ceir-snowstorm`), benötigt Elasticsearch und SNOMED-RF2-Import
+- **Bezug**: SNOMED CT ZIP-Datei intern via BIH SharePoint (wird direkt als Volume gemountet)
 - **Latenz**: Niedrig (lokales Netzwerk)
-- **Offline-faehig**: Ja
+- **Offline-fähig**: Ja
 
 #### Lokal: Dateibasiert (vorindexiert)
 
@@ -37,9 +37,9 @@ Der Terminology MCP Server buendelt drei verschiedene Terminologie-Quellen in ei
 
 - **Betrieb**: Dateien werden beim Containerstart aus `LOINC_PATH` geladen
 - **Lizenz**: [Regenstrief LOINC License](https://loinc.org/license/) (kostenlos nach Registrierung)
-- **Besonderheit**: Deutsche Labels, Panels, Answer Lists — kein externer Server noetig
+- **Besonderheit**: Deutsche Labels, Panels, Answer Lists — kein externer Server nötig
 - **Latenz**: Sehr niedrig (In-Memory)
-- **Offline-faehig**: Ja
+- **Offline-fähig**: Ja
 
 #### Remote: MII OntoServer (mTLS-gesichert)
 
@@ -49,11 +49,11 @@ Der Terminology MCP Server buendelt drei verschiedene Terminologie-Quellen in ei
 | OPS | `http://fhir.de/CodeSystem/bfarm/ops` | FHIR R4 API via MII Terminologieserver |
 | ATC | `http://fhir.de/CodeSystem/bfarm/atc` | FHIR R4 API via MII Terminologieserver |
 
-- **Betrieb**: Externer Server der Medizininformatik-Initiative, Zugang ueber mutual TLS (mTLS)
-- **Lizenz**: BfArM-Terminologien, Zugang ueber MII-Mitgliedschaft
-- **Besonderheit**: Versionsuebergreifende Suche (z.B. ICD-10-GM 2009–2025)
+- **Betrieb**: Externer Server der Medizininformatik-Initiative, Zugang über mutual TLS (mTLS)
+- **Lizenz**: BfArM-Terminologien, Zugang über MII-Mitgliedschaft
+- **Besonderheit**: Versionsübergreifende Suche (z.B. ICD-10-GM 2009–2025)
 - **Latenz**: Mittel (Netzwerk-Roundtrip)
-- **Offline-faehig**: Nein — erfordert Netzwerkverbindung und gueltige Zertifikate
+- **Offline-fähig**: Nein — erfordert Netzwerkverbindung und gültige Zertifikate
 
 ### Routing-Logik
 
@@ -68,22 +68,24 @@ Anfrage ──► system URL erkennen
 
 ### MII OntoServer Anbindung
 
-Der Zugriff auf den MII OntoServer erfolgt ueber mutual TLS (mTLS). Dafuer werden folgende Zertifikate benoetigt:
+Der Zugriff auf den MII OntoServer erfolgt über mutual TLS (mTLS). Dafür werden folgende Zertifikate benötigt:
 
-| Zertifikat | Umgebungsvariable (Base64) | Datei im Verzeichnis |
-|-----------|---------------------------|---------------------|
-| Client-Zertifikat | `CERT_CLIENT_PEM_B64` | `certs/client.pem` |
-| Privater Schluessel | `CERT_CLIENT_KEY_B64` | `certs/client.key` |
-| Root CA | `CERT_ROOT_CA_B64` | `certs/root-ca.pem` |
-| Intermediate CA | `CERT_INTERMEDIATE_B64` | `certs/intermediate.pem` |
+Zertifikate werden **zur Laufzeit** bereitgestellt — nie im Image:
 
-Zusaetzlich muss `CERT_PASSPHRASE` gesetzt sein.
+| Zertifikat | Lokal (Volume-Mount) | CI/CD (Env-Var) |
+|-----------|---------------------|-----------------|
+| Client-Zertifikat | `certs/client.pem` | `CERT_CLIENT_PEM_B64` |
+| Privater Schlüssel | `certs/client.key` | `CERT_CLIENT_KEY_B64` |
+| Root CA | `certs/root-ca.pem` | `CERT_ROOT_CA_B64` |
+| Intermediate CA | `certs/intermediate.pem` | `CERT_INTERMEDIATE_B64` |
+
+Die `CERT_PASSPHRASE` ist bei Thomas Debertshäuser zu erfragen (in beiden Varianten als Umgebungsvariable).
 
 ### Lokale LOINC-Daten
 
-Die lokale LOINC-Suche bietet gegenueber Server-Abfragen mehrere Vorteile:
+Die lokale LOINC-Suche bietet gegenüber Server-Abfragen mehrere Vorteile:
 
-- **Deutsche Labels**: Uebersetzungen aus der offiziellen LOINC-Linguistik-Datei
+- **Deutsche Labels**: Übersetzungen aus der offiziellen LOINC-Linguistik-Datei
 - **Schnelle Suche**: Vorindexierte Daten, kein Netzwerk-Roundtrip
 - **Panels**: Hierarchische Gruppierung von LOINC-Codes
 - **Answer Lists**: Zuordnung von LOINC Answer Codes
@@ -95,9 +97,9 @@ Die Daten werden beim Containerstart aus dem gemounteten `LOINC_PATH`-Verzeichni
 | Umgebungsvariable | Standard | Beschreibung |
 |-------------------|---------|-------------|
 | `SNOWSTORM_URL` | `http://snowstorm:8080/fhir` | Snowstorm FHIR-Endpunkt |
-| `CERT_PASSPHRASE` | - | Passwort fuer mTLS-Zertifikate |
-| `CERT_DIR` | `/app/certs` | Verzeichnis fuer Zertifikat-Dateien |
-| `LOINC_DIR` | `/app/loinc` | Verzeichnis fuer LOINC-Daten |
+| `CERT_PASSPHRASE` | - | Bei Thomas Debertshäuser erfragen |
+| `CERT_DIR` | `/app/certs` | Verzeichnis für Zertifikat-Dateien |
+| `LOINC_DIR` | `/app/loinc` | Verzeichnis für LOINC-Daten |
 | `PORT` | `3000` | HTTP REST Proxy Port |
 | `MCP_PORT` | `3002` | MCP SSE Port |
 | `HOST` | `0.0.0.0` | Bind-Adresse |
@@ -112,8 +114,8 @@ curl -s http://localhost:3000/health
 curl -s http://localhost:3002/health
 ```
 
-Beide Endpunkte muessen healthy sein, damit der Container als gesund gilt.
+Beide Endpunkte müssen healthy sein, damit der Container als gesund gilt.
 
-### Verfuegbare Tools
+### Verfügbare Tools
 
-Der Terminology MCP Server stellt 8 Tools bereit. Eine detaillierte Beschreibung aller Tools mit Parametern und Beispielen finden Sie auf der Seite [Terminologie-Tools](terminologie-tools.html).
+Der Terminology MCP Server stellt 8 Tools bereit. Eine detaillierte Beschreibung aller Tools mit Parametern und Beispielen findest du auf der Seite [Terminologie-Tools](terminologie-tools.html).

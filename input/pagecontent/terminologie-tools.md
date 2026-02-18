@@ -1,23 +1,23 @@
 Diese Seite beschreibt alle 8 Tools des Terminology MCP Servers mit Parametern, Beispielen und Hinweisen zur Verwendung.
 
-### Tool-Uebersicht
+### Tool-Übersicht
 
-Die 8 Tools nutzen unterschiedliche Terminologie-Quellen (siehe [Terminology MCP Server](terminologie-mcp.html) fuer Details):
+Die 8 Tools nutzen unterschiedliche Terminologie-Quellen (siehe [Terminology MCP Server](terminologie-mcp.html) für Details):
 
 | Nr. | Tool | Quelle | Beschreibung |
 |-----|------|--------|-------------|
 | 1 | `validate_code` | Snowstorm / MII / Lokal | Code in einem CodeSystem validieren |
-| 2 | `lookup_code` | Snowstorm / MII / Lokal | Details fuer einen bekannten Code abrufen |
+| 2 | `lookup_code` | Snowstorm / MII / Lokal | Details für einen bekannten Code abrufen |
 | 3 | `search_common_loinc` | Lokal (Dateien) | Schnelle lokale LOINC-Suche mit deutschen Labels |
-| 4 | `get_german_label` | Lokal (Dateien) | Deutsche LOINC-Uebersetzung |
-| 5 | `search_across_versions` | Remote (MII OntoServer) | Versionuebergreifende Suche (ICD-10-GM, OPS, ATC) |
+| 4 | `get_german_label` | Lokal (Dateien) | Deutsche LOINC-Übersetzung |
+| 5 | `search_across_versions` | Remote (MII OntoServer) | Versionübergreifende Suche (ICD-10-GM, OPS, ATC) |
 | 6 | `list_panels` | Lokal (Dateien) | LOINC-Panels auflisten |
 | 7 | `get_panel_components` | Lokal (Dateien) | Panel-Komponenten abrufen |
 | 8 | `lookup_loinc_answer_code` | Lokal (Dateien) | LOINC Answer Codes nachschlagen |
 
 **Legende Quellen:**
 - **Snowstorm** = Lokaler SNOMED CT FHIR Server (eigener Container)
-- **Lokal (Dateien)** = Vorindexierte LOINC-Daten im Container (offline-faehig)
+- **Lokal (Dateien)** = Vorindexierte LOINC-Daten im Container (offline-fähig)
 - **Remote (MII OntoServer)** = Externer Server der Medizininformatik-Initiative (mTLS, Netzwerk erforderlich)
 
 ---
@@ -33,7 +33,7 @@ Validiert, ob ein Code in einem gegebenen CodeSystem existiert.
 | `system` | string | ja | CodeSystem-URL |
 | `code` | string | ja | Zu validierender Code |
 
-**Unterstuetzte CodeSystem-URLs:**
+**Unterstützte CodeSystem-URLs:**
 
 | CodeSystem | URL |
 |-----------|-----|
@@ -65,7 +65,7 @@ Validiert, ob ein Code in einem gegebenen CodeSystem existiert.
 
 ### 2. lookup_code
 
-Ruft Details fuer einen bekannten Code ab: Display-Name, Properties und Uebersetzungen.
+Ruft Details für einen bekannten Code ab: Display-Name, Properties und Übersetzungen.
 
 **Parameter:**
 
@@ -124,7 +124,7 @@ Ruft Details fuer einen bekannten Code ab: Display-Name, Properties und Ueberset
 
 ### 3. search_common_loinc
 
-Schnelle lokale Suche in den haeufigsten LOINC-Codes mit deutschen Labels. Bevorzugtes Tool fuer LOINC-Suchen.
+Schnelle lokale Suche in den häufigsten LOINC-Codes mit deutschen Labels. Bevorzugtes Tool für LOINC-Suchen.
 
 **Parameter:**
 
@@ -170,7 +170,7 @@ Schnelle lokale Suche in den haeufigsten LOINC-Codes mit deutschen Labels. Bevor
 
 ### 4. get_german_label
 
-Liefert die deutsche Uebersetzung fuer einen LOINC-Code.
+Liefert die deutsche Übersetzung für einen LOINC-Code.
 
 **Parameter:**
 
@@ -209,7 +209,7 @@ Durchsucht mehrere Versionen eines CodeSystems (ICD-10-GM, OPS oder ATC). Findet
 | `system` | string | ja | CodeSystem-URL (siehe unten) |
 | `searchText` | string | ja | Suchbegriff |
 
-**Unterstuetzte Systeme:**
+**Unterstützte Systeme:**
 
 | System | URL |
 |--------|-----|
@@ -217,7 +217,7 @@ Durchsucht mehrere Versionen eines CodeSystems (ICD-10-GM, OPS oder ATC). Findet
 | OPS | `http://fhir.de/CodeSystem/bfarm/ops` |
 | ATC | `http://fhir.de/CodeSystem/bfarm/atc` |
 
-**Beispiel: ICD-10 Code fuer Diabetes**
+**Beispiel: ICD-10 Code für Diabetes**
 
 ```json
 {
@@ -226,7 +226,7 @@ Durchsucht mehrere Versionen eines CodeSystems (ICD-10-GM, OPS oder ATC). Findet
 }
 ```
 
-**Antwort (gekuerzt):**
+**Antwort (gekürzt):**
 
 ```json
 {
@@ -238,14 +238,14 @@ Durchsucht mehrere Versionen eines CodeSystems (ICD-10-GM, OPS oder ATC). Findet
     "codes": [
       { "code": "E10.9", "display": "Diabetes mellitus, Typ 1, ohne Komplikationen" },
       { "code": "E11.9", "display": "Diabetes mellitus, Typ 2, ohne Komplikationen" },
-      { "code": "E13.9", "display": "Sonstiger naeher bezeichneter Diabetes mellitus" }
+      { "code": "E13.9", "display": "Sonstiger näher bezeichneter Diabetes mellitus" }
     ]
   },
   "totalUniqueCodes": 42
 }
 ```
 
-**Beispiel: OPS Code fuer Appendektomie**
+**Beispiel: OPS Code für Appendektomie**
 
 ```json
 {
@@ -254,7 +254,7 @@ Durchsucht mehrere Versionen eines CodeSystems (ICD-10-GM, OPS oder ATC). Findet
 }
 ```
 
-**Beispiel: ATC Code fuer Metformin**
+**Beispiel: ATC Code für Metformin**
 
 ```json
 {
@@ -263,13 +263,13 @@ Durchsucht mehrere Versionen eines CodeSystems (ICD-10-GM, OPS oder ATC). Findet
 }
 ```
 
-**Tipp:** Verwenden Sie kurze Suchbegriffe. "Diabetes" liefert bessere Ergebnisse als "Diabetes mellitus Typ 2 ohne Komplikationen".
+**Tipp:** Verwende kurze Suchbegriffe. "Diabetes" liefert bessere Ergebnisse als "Diabetes mellitus Typ 2 ohne Komplikationen".
 
 ---
 
 ### 6. list_panels
 
-Listet alle verfuegbaren LOINC-Panels auf.
+Listet alle verfügbaren LOINC-Panels auf.
 
 **Parameter:** Keine
 
@@ -279,7 +279,7 @@ Listet alle verfuegbaren LOINC-Panels auf.
 {}
 ```
 
-**Antwort (gekuerzt):**
+**Antwort (gekürzt):**
 
 ```json
 {
@@ -311,7 +311,7 @@ Ruft die Komponenten (Member-Codes) eines LOINC-Panels ab.
 }
 ```
 
-**Antwort (gekuerzt):**
+**Antwort (gekürzt):**
 
 ```json
 {
@@ -329,7 +329,7 @@ Ruft die Komponenten (Member-Codes) eines LOINC-Panels ab.
 
 ### 8. lookup_loinc_answer_code
 
-Schlaegt Details zu einem LOINC Answer Code nach. Answer Codes werden in LOINC fuer standardisierte Antwortoptionen verwendet (z.B. bei Fragebögen).
+Schlägt Details zu einem LOINC Answer Code nach. Answer Codes werden in LOINC für standardisierte Antwortoptionen verwendet (z.B. bei Fragebögen).
 
 **Parameter:**
 
@@ -366,6 +366,6 @@ Schlaegt Details zu einem LOINC Answer Code nach. Answer Codes werden in LOINC f
 | OPS Code suchen | `search_across_versions` | "Appendektomie", "Koloskopie" |
 | ATC Code suchen | `search_across_versions` | "Metformin", "Ibuprofen" |
 | Bekannten Code nachschlagen | `lookup_code` | SNOMED 84114007, LOINC 2160-0 |
-| Deutsche LOINC-Uebersetzung | `get_german_label` | Code 2160-0 |
+| Deutsche LOINC-Übersetzung | `get_german_label` | Code 2160-0 |
 | Code validieren | `validate_code` | "Existiert E11.9 in ICD-10-GM?" |
 | Laborpanel anzeigen | `list_panels` + `get_panel_components` | Panel 24323-8 |
