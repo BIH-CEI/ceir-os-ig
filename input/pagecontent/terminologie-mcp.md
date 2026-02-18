@@ -14,6 +14,34 @@ Der Server stellt **zwei Schnittstellen** bereit:
 - **Port 3000 (HTTP REST)**: Klassische HTTP-Endpunkte für Terminologie-Abfragen. Wird von der MCP Bridge und anderen Services genutzt.
 - **Port 3002 (MCP SSE)**: Server-Sent Events Endpunkt für das Model Context Protocol. Wird von Claude Code und anderen MCP-Clients genutzt.
 
+### CodeSystem-Index
+
+Die folgende Tabelle zeigt alle über CEIR-OS verfügbaren CodeSystems mit der exakten `system`-URL für FHIR-Abfragen.
+
+| CodeSystem | `system`-URL (für FHIR) | Quelle | Versionen | Offline |
+|-----------|------------------------|--------|-----------|---------|
+| SNOMED CT | `http://snomed.info/sct` | Snowstorm (lokal) | International 2025-12, DE + CH Editionen | Ja |
+| LOINC | `http://loinc.org` | Lokale Dateien | ~20.000 häufige Codes + deutsche Labels | Ja |
+| ICD-10-GM | `http://fhir.de/CodeSystem/bfarm/icd-10-gm` | MII OntoServer (remote) | 2009–2025 (17 Versionen) | Nein |
+| OPS | `http://fhir.de/CodeSystem/bfarm/ops` | MII OntoServer (remote) | Mehrere Jahresversionen | Nein |
+| ATC | `http://fhir.de/CodeSystem/bfarm/atc` | MII OntoServer (remote) | Mehrere Jahresversionen | Nein |
+
+> **Tipp:** Die `system`-URL ist der Wert, den du bei `validate_code`, `lookup_code` und `search_across_versions` als `system`-Parameter übergibst. Beispiel: `{"system": "http://fhir.de/CodeSystem/bfarm/icd-10-gm", "code": "E11.9"}`.
+
+#### Welches Tool für welches CodeSystem?
+
+| Tool | SNOMED CT | LOINC | ICD-10-GM | OPS | ATC |
+|------|-----------|-------|-----------|-----|-----|
+| `validate_code` | x | x | x | x | x |
+| `lookup_code` | x | x | x | x | x |
+| `search_codes` | x | x | x | x | x |
+| `search_common_loinc` | | x | | | |
+| `get_german_label` | | x | | | |
+| `search_across_versions` | | | x | x | x |
+| `list_panels` | | x | | | |
+| `get_panel_components` | | x | | | |
+| `lookup_loinc_answer_code` | | x | | | |
+
 ### Unterstützte CodeSysteme nach Quelle
 
 Der Terminology MCP Server bündelt drei verschiedene Terminologie-Quellen in einer einheitlichen Schnittstelle. Die Quelle bestimmt Verfügbarkeit, Latenz und Konfigurationsaufwand.
@@ -26,6 +54,7 @@ Der Terminology MCP Server bündelt drei verschiedene Terminologie-Quellen in ei
 
 - **Betrieb**: Eigener Container (`ceir-snowstorm`), benötigt Elasticsearch und SNOMED-RF2-Import
 - **Bezug**: SNOMED CT ZIP-Datei intern via BIH SharePoint (wird direkt als Volume gemountet)
+- **Geladene Editionen**: International (900000000000207008), DE-Edition (11000274103), CH-Edition (2011000195101)
 - **Latenz**: Niedrig (lokales Netzwerk)
 - **Offline-fähig**: Ja
 
@@ -54,6 +83,24 @@ Der Terminology MCP Server bündelt drei verschiedene Terminologie-Quellen in ei
 - **Besonderheit**: Versionsübergreifende Suche (z.B. ICD-10-GM 2009–2025)
 - **Latenz**: Mittel (Netzwerk-Roundtrip)
 - **Offline-fähig**: Nein — erfordert Netzwerkverbindung und gültige Zertifikate
+
+#### Weitere CodeSystems auf dem MII OntoServer
+
+Der MII OntoServer stellt insgesamt **1.658 eindeutige CodeSystem-URLs** (1.792 Einträge inkl. Versionen) bereit. Die CEIR-OS Tools (`validate_code`, `lookup_code`, `search_codes`) können prinzipiell alle diese CodeSystems abfragen. Die folgende Tabelle zeigt die wichtigsten Kategorien:
+
+| Kategorie | Anzahl URLs | Beispiele |
+|-----------|-------------|-----------|
+| HL7 Terminologien | 875 | `http://terminology.hl7.org/CodeSystem/...` (Admit Source, Condition Category, Observation Category etc.) |
+| Sonstige (MII, HiGHmed, FDPG etc.) | 425 | MII KDS Module, HiGHmed Onkologie, FDPG Translations, GECCO, NUM |
+| HL7 FHIR Core | 277 | `http://hl7.org/fhir/...` (Administrative Gender, Resource Types, Data Types etc.) |
+| DE Basisprofil | 37 | `http://fhir.de/CodeSystem/...` (Kontaktebene, ASK, ABDATA, DKGeV, DEÜVAnlagen) |
+| BfArM | 24 | ICD-10-GM (17 Versionen), OPS (16), ATC (8), Alpha-ID (11), plus Supplements |
+| Ontologien | 16 | HPO, ORPHAcodes, Gene Ontology (GO), HGNC, Sequence Ontology, DICOM, UNII |
+| SNOMED CT | 2 | International Edition + MII Supplement |
+| LOINC | 1 | Versionen 2.77–2.80 |
+| WHO | 1 | ICD-11 MMS |
+
+> **Hinweis:** Die Tools `search_across_versions` und `search_common_loinc` sind für die Haupt-CodeSystems (ICD-10-GM, OPS, ATC bzw. LOINC) optimiert. Für alle anderen CodeSystems auf dem OntoServer kannst du `validate_code`, `lookup_code` und `search_codes` mit der jeweiligen `system`-URL verwenden.
 
 ### Routing-Logik
 
@@ -118,4 +165,4 @@ Beide Endpunkte müssen healthy sein, damit der Container als gesund gilt.
 
 ### Verfügbare Tools
 
-Der Terminology MCP Server stellt 8 Tools bereit. Eine detaillierte Beschreibung aller Tools mit Parametern und Beispielen findest du auf der Seite [Terminologie-Tools](terminologie-tools.html).
+Der Terminology MCP Server stellt 10 Tools bereit. Eine detaillierte Beschreibung der wichtigsten Tools mit Parametern und Beispielen findest du auf der Seite [Terminologie-Tools](terminologie-tools.html).
