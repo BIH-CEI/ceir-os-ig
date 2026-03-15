@@ -111,38 +111,31 @@ Beim ersten Start passiert automatisch:
 
 ### Schritt 8: Verifizierung
 
-Prüfe den Status aller Services:
+Prüfe den Status aller Container:
 
 ```bash
 docker compose ps
 ```
 
-Health-Checks für einzelne Services:
+Führe den integrierten Doctor-Service aus, um alle Services, DNS-Auflösung und funktionale Routen zu prüfen:
 
 ```bash
-# Elasticsearch
-curl -s http://localhost:9200/_cluster/health | jq .status
+docker compose run --rm doctor
+```
 
+Der Doctor prüft DNS-Auflösung, Snowstorm FHIR-Endpunkte, SNOMED-Routing durch den Terminology Proxy, LOINC deutsche Labels und Panel-Index sowie alle Health-Endpunkte. Bei Problemen zeigt er genau an, welcher Check fehlschlägt.
+
+Alternativ für einzelne Services:
+
+```bash
 # Snowstorm
 curl -s http://localhost:8090/fhir/metadata | jq .software
 
-# Terminology MCP (HTTP Proxy)
-curl -s http://localhost:3000/health
-
-# Terminology MCP (MCP SSE)
-curl -s http://localhost:3002/health
-
-# AskMII
-curl -s http://localhost:2026/health
+# Terminology MCP
+curl -s http://localhost:3002/health | jq .
 
 # MCP Bridge
-curl -s http://localhost:8000/health
-
-# Ollama
-curl -s http://localhost:11434
-
-# Open WebUI
-curl -s http://localhost:3080
+curl -s http://localhost:8000/health | jq .
 ```
 
 ### Elasticsearch-Speicher anpassen

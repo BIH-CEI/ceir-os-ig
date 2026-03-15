@@ -44,6 +44,12 @@ Details: [Terminology MCP Server](terminologie-mcp.html) · [Terminologie-Tools]
 | Zotero Comfort | 3001 | Literaturverwaltung MCP (Gruppen- + persönliche Bibliothek) |
 | FHIR Spec MCP | 8002 | FHIR R4 Spezifikationsnavigator |
 
+#### Betrieb
+
+| Service | Aufruf | Funktion |
+|---------|--------|----------|
+| Doctor | `docker compose run --rm doctor` | Funktionaler Health Check aller Services (DNS, SNOMED Routing, LOINC Tools) |
+
 ### Schnellstart
 
 ```bash

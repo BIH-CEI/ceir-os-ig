@@ -48,6 +48,27 @@ docker volume rm ceir-os_sct_files
 docker compose up -d
 ```
 
+### Snowstorm DNS-Auflösung fehlgeschlagen
+
+**Symptom:** Der Terminology MCP Server kann Snowstorm nicht erreichen. `lookup_code` für SNOMED CT schlägt fehl, obwohl Snowstorm läuft.
+
+**Ursache:** Wenn Snowstorm einzeln neu gestartet wird (z.B. `docker restart ceir-snowstorm`), verliert der Container seinen DNS-Alias im Docker-Netzwerk. Andere Container können `snowstorm` dann nicht mehr auflösen.
+
+**Diagnose:**
+
+```bash
+# Doctor-Service ausführen — prüft DNS und alle Routen
+docker compose run --rm doctor
+```
+
+**Lösung:** Snowstorm und abhängige Services über Docker Compose neu erstellen:
+
+```bash
+docker compose up -d --force-recreate snowstorm terminology-mcp
+```
+
+> **Wichtig:** `docker restart` reicht nicht — es muss `--force-recreate` sein, damit Docker die DNS-Einträge im Netzwerk neu registriert.
+
 ### SNOMED-Import dauert sehr lange
 
 Der initiale Import kann je nach Paketgröße 10-30 Minuten dauern. Fortschritt prüfen:
@@ -184,40 +205,37 @@ BRIDGE_PORT=8001
 
 ### Health Checks für alle Services
 
-Nutze folgendes Skript, um den Status aller Services zu prüfen:
+CEIR-OS enthält einen integrierten **Doctor-Service**, der alle Services, DNS-Auflösung und funktionale Routen prüft:
 
 ```bash
-echo "=== CEIR-OS Health Check ==="
+docker compose run --rm doctor
+```
 
-echo -n "Elasticsearch:    "
-curl -sf http://localhost:9200/_cluster/health | jq -r .status 2>/dev/null || echo "NICHT ERREICHBAR"
+Der Doctor führt 20 Checks aus:
 
-echo -n "Snowstorm:        "
-curl -sf http://localhost:8090/fhir/metadata | jq -r .software.version 2>/dev/null || echo "NICHT ERREICHBAR"
+| Kategorie | Was wird geprüft |
+|-----------|-----------------|
+| DNS-Auflösung | Alle 5 Service-Hostnamen im Docker-Netzwerk |
+| Elasticsearch | Cluster Health |
+| Snowstorm (direkt) | FHIR Metadata, CodeSystems, Concept Lookup, FHIR CodeSystem Lookup |
+| SNOMED Routing | Terminology Proxy → Snowstorm (POST /lookup mit echten SNOMED-Codes) |
+| LOINC Local Tools | Deutsche Labels (Körpertemperatur, Kreatinin), Panel-Index |
+| Service Health | Proxy HTTP, MCP SSE, Snowstorm-Verbindung, LOINC-Panels geladen |
+| MCP Bridge | Health Check |
 
-echo -n "Terminology HTTP: "
-curl -sf http://localhost:3000/health | jq -r .status 2>/dev/null || echo "NICHT ERREICHBAR"
+Alternativ gibt es das Host-seitige Script `./doctor.sh`, das zusätzlich Container-Status und Cross-Service-Konnektivität von außen prüft.
 
-echo -n "Terminology MCP:  "
-curl -sf http://localhost:3002/health | jq -r .status 2>/dev/null || echo "NICHT ERREICHBAR"
+Für einzelne Services:
 
-echo -n "AskMII:           "
-curl -sf http://localhost:2026/health | jq -r .status 2>/dev/null || echo "NICHT ERREICHBAR"
+```bash
+# Snowstorm
+curl -s http://localhost:8090/fhir/metadata | jq .software
 
-echo -n "MCP Bridge:       "
-curl -sf http://localhost:8000/health | jq -r .status 2>/dev/null || echo "NICHT ERREICHBAR"
+# Terminology MCP
+curl -s http://localhost:3002/health | jq .
 
-echo -n "Ollama:           "
-curl -sf http://localhost:11434 >/dev/null 2>&1 && echo "OK" || echo "NICHT ERREICHBAR"
-
-echo -n "OpenWebUI:        "
-curl -sf http://localhost:3080 >/dev/null 2>&1 && echo "OK" || echo "NICHT ERREICHBAR"
-
-echo -n "FHIR Spec MCP:    "
-curl -sf http://localhost:8002/health | jq -r .status 2>/dev/null || echo "NICHT ERREICHBAR"
-
-echo -n "Zotero Comfort:   "
-curl -sf http://localhost:3001/health | jq -r .status 2>/dev/null || echo "NICHT ERREICHBAR"
+# MCP Bridge
+curl -s http://localhost:8000/health | jq .
 ```
 
 ### Vollständiger Neustart

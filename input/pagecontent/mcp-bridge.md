@@ -26,7 +26,7 @@ Beim Start fragt die Bridge alle konfigurierten MCP-Server nach ihren Tools ab:
 |-----------|-----|-------|
 | Terminology MCP | `http://terminology-mcp:3000` | 8 Terminologie-Tools |
 | AskMII | `http://ask-mii:2026` | FDPG Query Tools |
-| FHIR Spec MCP | `http://fhir-spec:3001` | FHIR-Navigations-Tools |
+| FHIR Spec MCP | `http://fhir-spec-mcp:8080` | FHIR-Navigations-Tools |
 
 Die entdeckten Tools werden in das OpenAI Function Format konvertiert und bei jedem Chat-Request an Ollama mitgegeben.
 
