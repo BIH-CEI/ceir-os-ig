@@ -53,7 +53,7 @@ Der Terminology MCP Server bündelt drei verschiedene Terminologie-Quellen in ei
 | SNOMED CT | `http://snomed.info/sct` | FHIR R4 API via Snowstorm (Elasticsearch) |
 
 - **Betrieb**: Eigener Container (`ceir-snowstorm`), benötigt Elasticsearch und SNOMED-RF2-Import
-- **Bezug**: SNOMED CT ZIP-Datei intern via BIH SharePoint (wird direkt als Volume gemountet)
+- **Bezug**: SNOMED CT ZIP-Datei wird teamintern bereitgestellt (wird direkt als Volume gemountet)
 - **Geladene Editionen**: International (900000000000207008), DE-Edition (11000274103), CH-Edition (2011000195101)
 - **Latenz**: Niedrig (lokales Netzwerk)
 - **Offline-fähig**: Ja
@@ -128,7 +128,7 @@ Zertifikate werden **zur Laufzeit** bereitgestellt — nie im Image:
 | Root CA | `certs/root-ca.pem` | `CERT_ROOT_CA_B64` |
 | Intermediate CA | `certs/intermediate.pem` | `CERT_INTERMEDIATE_B64` |
 
-Die `CERT_PASSPHRASE` ist bei Thomas Debertshäuser zu erfragen (in beiden Varianten als Umgebungsvariable).
+Die `CERT_PASSPHRASE` ist über teaminterne Kanäle zu beziehen (in beiden Varianten als Umgebungsvariable).
 
 ### Lokale LOINC-Daten
 
@@ -146,7 +146,7 @@ Die Daten werden beim Containerstart aus dem gemounteten `LOINC_PATH`-Verzeichni
 | Umgebungsvariable | Standard | Beschreibung |
 |-------------------|---------|-------------|
 | `SNOWSTORM_URL` | `http://snowstorm:8080/fhir` | Snowstorm FHIR-Endpunkt |
-| `CERT_PASSPHRASE` | - | Bei Thomas Debertshäuser erfragen |
+| `CERT_PASSPHRASE` | - | Teamintern bereitgestellt |
 | `CERT_DIR` | `/app/certs` | Verzeichnis für Zertifikat-Dateien |
 | `LOINC_DIR` | `/app/loinc` | Verzeichnis für LOINC-Daten |
 | `PORT` | `3000` | HTTP REST Proxy Port |

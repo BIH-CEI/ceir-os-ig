@@ -74,7 +74,9 @@ Details zur Konfiguration und Installation findest du auf der Seite [Installatio
 
 | Seite | Inhalt |
 |-------|--------|
+| [Anwendungsfälle](anwendungsfaelle.html) | Wer nutzt CEIR-OS und wofür? Rollen, Use Cases und Tool-Zuordnung |
 | [System-Architektur](architektur.html) | Netzwerk, Service-Gruppen, Datenflüsse und Volumes |
+| [Architekturentscheidungen](architekturentscheidungen.html) | Warum lokaler Snowstorm? Warum eigener MCP? 7 dokumentierte ADRs |
 | [Installation](installation.html) | Schritt-für-Schritt-Anleitung |
 | [Terminology MCP Server](terminologie-mcp.html) | Zentraler Terminologie-Zugang (SNOMED, LOINC, ICD-10-GM, OPS, ATC) |
 | [Snowstorm SNOMED CT](snowstorm.html) | SNOMED CT Server, Import und FHIR API |

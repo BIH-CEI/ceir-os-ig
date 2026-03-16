@@ -34,9 +34,9 @@ cp .env.example .env
 
 ### Schritt 3: SNOMED CT ZIP-Datei einbinden
 
-Das SNOMED CT RF2-Paket liegt intern im BIH SharePoint. Du musst es **nicht** separat beschaffen.
+Das SNOMED CT RF2-Paket wird teaminternen bereitgestellt.
 
-1. Lade die SNOMED CT ZIP-Datei aus dem SharePoint herunter
+1. Lade die SNOMED CT ZIP-Datei aus dem bereitgestellten Speicherort herunter
 2. Trage den Pfad zur ZIP-Datei in `SNOMED_PACKAGE_PATH` ein — die Datei wird direkt als Volume gemountet
 3. Der SNOMED Unpacker entpackt die ZIP beim ersten Start automatisch
 
@@ -57,7 +57,7 @@ mkdir -p certs
 # certs/intermediate.pem   - Intermediate CA
 ```
 
-Die `CERT_PASSPHRASE` direkt bei Thomas Debertshäuser erfragen und in der `.env`-Datei eintragen.
+Die `CERT_PASSPHRASE` ist teaminternen Kanälen zu entnehmen und in der `.env`-Datei einzutragen.
 
 **CI/CD: Base64-Umgebungsvariablen**
 

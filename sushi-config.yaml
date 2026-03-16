@@ -24,8 +24,12 @@ parameters:
 pages:
   index.md:
     title: Übersicht
+  anwendungsfaelle.md:
+    title: Anwendungsfälle
   architektur.md:
     title: System-Architektur
+  architekturentscheidungen.md:
+    title: Architekturentscheidungen
   installation.md:
     title: Installation
   terminologie-mcp.md:
@@ -53,8 +57,11 @@ pages:
 
 menu:
   Übersicht: index.html
+  Anwendungsfälle: anwendungsfaelle.html
   Installation: installation.html
-  Architektur: architektur.html
+  Architektur:
+    System-Architektur: architektur.html
+    Architekturentscheidungen: architekturentscheidungen.html
   Services:
     Terminology MCP: terminologie-mcp.html
     Snowstorm: snowstorm.html

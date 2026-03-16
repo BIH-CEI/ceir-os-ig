@@ -86,7 +86,7 @@ Der SNOMED CT Browser bietet eine grafische Oberfläche zur Exploration der Term
 
 ### SNOMED CT Daten
 
-Die SNOMED CT ZIP-Datei liegt intern im BIH SharePoint und wird direkt als Volume in den Container gemountet.
+Die SNOMED CT ZIP-Datei wird teamintern bereitgestellt und direkt als Volume in den Container gemountet.
 
 **Lokal:** Die ZIP-Datei wird über `SNOMED_PACKAGE_PATH` in der `.env` referenziert. Beim ersten Start entpackt der `snomed-unpacker`-Container die Datei automatisch in das `sct_files`-Volume.
 
