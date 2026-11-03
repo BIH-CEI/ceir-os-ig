@@ -123,10 +123,12 @@ Zertifikate werden **zur Laufzeit** bereitgestellt — nie im Image:
 
 | Zertifikat | Lokal (Volume-Mount) | CI/CD (Env-Var) |
 |-----------|---------------------|-----------------|
-| Client-Zertifikat | `certs/client.pem` | `CERT_CLIENT_PEM_B64` |
-| Privater Schlüssel | `certs/client.key` | `CERT_CLIENT_KEY_B64` |
-| Root CA | `certs/root-ca.pem` | `CERT_ROOT_CA_B64` |
+| Client-Zertifikat | `certs/<Name>.pem` (z.B. `BIH-CEI_Team.pem`) | `CERT_CLIENT_PEM_B64` |
+| Privater Schlüssel | `certs/<Name>.key` (gleicher Basisname) | `CERT_CLIENT_KEY_B64` |
+| Root CA | `certs/rootca.pem` | `CERT_ROOT_CA_B64` |
 | Intermediate CA | `certs/intermediate.pem` | `CERT_INTERMEDIATE_B64` |
+
+Der Basisname des Client-Zertifikats wird ab terminology-mcp 1.1.2 automatisch erkannt (genau ein `<Name>.pem`/`<Name>.key`-Paar im Zertifikatsverzeichnis) oder über `CERT_CLIENT_NAME` gesetzt. SU-TermServ-Bundles können daher beim Zertifikatswechsel unverändert abgelegt werden; nur `CERT_PASSPHRASE` muss mitgezogen werden.
 
 Die `CERT_PASSPHRASE` ist über teaminterne Kanäle zu beziehen (in beiden Varianten als Umgebungsvariable).
 

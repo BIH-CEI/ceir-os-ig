@@ -51,10 +51,11 @@ Zertifikatsdateien werden zur Laufzeit als Read-Only-Volume in den Container gem
 ```bash
 mkdir -p certs
 # Lege folgende Dateien ab:
-# certs/client.pem        - Client-Zertifikat
-# certs/client.key         - Privater Schlüssel
-# certs/root-ca.pem        - Root CA
-# certs/intermediate.pem   - Intermediate CA
+# certs/<Name>.pem        - Client-Zertifikat (SU-TermServ-Bundle, z.B. BIH-CEI_Team.pem)
+# certs/<Name>.key        - Privater Schlüssel (gleicher Basisname; wird automatisch erkannt,
+#                           bei mehreren Paaren CERT_CLIENT_NAME setzen)
+# certs/rootca.pem        - Root CA
+# certs/intermediate.pem  - Intermediate CA
 ```
 
 Die `CERT_PASSPHRASE` ist teaminternen Kanälen zu entnehmen und in der `.env`-Datei einzutragen.
