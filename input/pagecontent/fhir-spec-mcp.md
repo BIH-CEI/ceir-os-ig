@@ -6,7 +6,7 @@ Der FHIR Spezifikations-Navigator ermöglicht den MCP-basierten Zugriff auf die 
 |------------|------|
 | Container | `ceir-fhir-spec-mcp` |
 | Port | 8002 |
-| Image | `ghcr.io/BIH-CEI/fhir-spec-mcp:latest` |
+| Image | `ghcr.io/bih-cei/fhir-spec-mcp:latest` |
 | FHIR-Version | 4.0.1 (R4) |
 | Protokoll | MCP (SSE) |
 | Repository | [github.com/BIH-CEI/fhir-spec-mcp](https://github.com/BIH-CEI/fhir-spec-mcp) |
