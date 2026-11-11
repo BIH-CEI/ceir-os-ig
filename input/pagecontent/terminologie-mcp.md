@@ -4,10 +4,10 @@ Der Terminology MCP Server ist der zentrale Terminologie-Zugang in CEIR-OS. Er b
 
 | Eigenschaft | Wert |
 |------------|------|
-| Container | `ceir-terminology-mcp` |
+| Container | `terminology-mcp` |
 | Port 3000 | HTTP REST Proxy |
 | Port 3002 | MCP SSE Endpunkt |
-| Image | Eigener Build aus `terminology-proxy-mcp/` |
+| Image | `ghcr.io/bih-cei/terminology-mcp/terminology-mcp:<Tag>` aus dem Repo `terminology-mcp`, Tag über `TERMINOLOGY_MCP_VERSION` in `.env`, lokal baubar |
 
 Der Server stellt **zwei Schnittstellen** bereit:
 
@@ -148,7 +148,10 @@ Die Daten werden beim Containerstart aus dem gemounteten `LOINC_PATH`-Verzeichni
 | Umgebungsvariable | Standard | Beschreibung |
 |-------------------|---------|-------------|
 | `SNOWSTORM_URL` | `http://snowstorm:8080/fhir` | Snowstorm FHIR-Endpunkt |
-| `CERT_PASSPHRASE` | - | Teamintern bereitgestellt |
+| `SNOWSTORM_SNOMED_VERSION` | `.../version/20261001` | Standard-Edition für SNOMED-Lookups, muss auf dem Snowstorm-Image existieren |
+| `PROXY_SMART_ROUTING` | `true` | REST-Proxy routet wie die MCP-Tools; `false` = reiner OntoServer-Passthrough |
+| `BLAZE_URL` | `http://blaze-full:8080/fhir` | Fallback bei nicht erreichbarem OntoServer (LOINC, SNOMED CT International) |
+| `CERT_PASSPHRASE` | - | Teamintern bereitgestellt; Shell-Variablen schlagen `.env` |
 | `CERT_DIR` | `/app/certs` | Verzeichnis für Zertifikat-Dateien |
 | `LOINC_DIR` | `/app/loinc` | Verzeichnis für LOINC-Daten |
 | `PORT` | `3000` | HTTP REST Proxy Port |
@@ -163,10 +166,13 @@ curl -s http://localhost:3000/health
 
 # MCP SSE
 curl -s http://localhost:3002/health
+
+# Backends: ontoserver / snowstorm / blaze erreichbar?
+curl -s http://localhost:3000/ready | jq .backends
 ```
 
-Beide Endpunkte müssen healthy sein, damit der Container als gesund gilt.
+Beide Health-Endpunkte müssen antworten, damit der Container als gesund gilt. Jeder Aufruf über REST oder MCP landet im Call-Log `logs/terminology-mcp/terminology-calls.jsonl` mit Tool, Argumenten, Quelle, Trefferzahl und Dauer.
 
 ### Verfügbare Tools
 
-Der Terminology MCP Server stellt 10 Tools bereit. Eine detaillierte Beschreibung der wichtigsten Tools mit Parametern und Beispielen findest du auf der Seite [Terminologie-Tools](terminologie-tools.html).
+Der Terminology MCP Server stellt 19 Tools bereit. Eine detaillierte Beschreibung der wichtigsten Tools mit Parametern und Beispielen findest du auf der Seite [Terminologie-Tools](terminologie-tools.html).

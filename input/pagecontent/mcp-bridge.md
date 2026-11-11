@@ -1,4 +1,4 @@
-Die MCP-OpenAI Bridge verbindet lokale LLMs mit den MCP-Tools von CEIR-OS. Sie übersetzt MCP-Tool-Definitionen in das OpenAI Function Calling Format und führt Tool-Aufrufe automatisch aus.
+Die MCP-OpenAI Bridge verbindet lokale LLMs mit den MCP-Tools von CEIR-OS. Sie übersetzt MCP-Tool-Definitionen in das OpenAI Function Calling Format, führt Tool-Aufrufe aus und gibt die Ergebnisse an das Modell zurück. Open WebUI spricht ausschließlich mit der Bridge.
 
 ### Übersicht
 
@@ -8,100 +8,110 @@ Die MCP-OpenAI Bridge verbindet lokale LLMs mit den MCP-Tools von CEIR-OS. Sie �
 | Port | 8000 |
 | Framework | FastAPI + Uvicorn |
 | Protokoll | OpenAI-kompatible REST API |
+| Quelle | `src/mcp_bridge/server.py`, Build durch Compose |
 
 ### API-Endpunkte
 
 | Endpunkt | Methode | Beschreibung |
 |----------|---------|-------------|
-| `/v1/chat/completions` | POST | Chat-Completions mit Tool-Unterstützung |
+| `/v1/chat/completions` | POST | Chat-Completions mit Tool-Unterstützung, Streaming als SSE-Chunks |
 | `/v1/models` | GET | Verfügbare Modelle (Proxy zu Ollama) |
-| `/v1/tools` | GET | Verfügbare Tools auflisten |
-| `/health` | GET | Health Check |
+| `/v1/tools` | GET | Entdeckte Tools im OpenAI-Format |
+| `/health` | GET | Health Check mit Tool-Anzahl |
 
 ### Dynamische Tool-Discovery
 
-Beim Start fragt die Bridge alle konfigurierten MCP-Server nach ihren Tools ab:
+Beim Start fragt die Bridge alle konfigurierten MCP-Server über `GET /tools` nach ihren Tools und führt sie später über `POST /call_tool` aus:
 
 | MCP-Server | URL | Tools |
 |-----------|-----|-------|
-| Terminology MCP | `http://terminology-mcp:3000` | 8 Terminologie-Tools |
-| AskMII | `http://ask-mii:2026` | FDPG Query Tools |
-| FHIR Spec MCP | `http://fhir-spec-mcp:8080` | FHIR-Navigations-Tools |
+| terminology-mcp | `http://terminology-mcp:3000` | 19 Terminologie-Tools |
+| decision-mcp | `http://decision-mcp:3002` | 2 Tools (`map_concept`, `rank_candidates`) |
 
-Die entdeckten Tools werden in das OpenAI Function Format konvertiert und bei jedem Chat-Request an Ollama mitgegeben.
+Die entdeckten Tool-Schemata werden unverändert übernommen, einschließlich Enums. Das `system`-Feld von `search_across_versions` ist seit terminology-mcp 1.1.4 ein Enum der vier BfArM-Systeme, damit kleine Modelle die URLs nicht mehr raten.
 
-Falls die Discovery fehlschlägt, werden Fallback-Tools verwendet (lookup_code, search_common_loinc, get_german_label, search_across_versions).
+Fällt die Discovery aus, greifen eingebaute Fallback-Definitionen (`lookup_code`, `search_common_loinc`, `get_german_label`, `search_across_versions`) über die REST-Endpunkte des Proxys.
 
 ### Ausgeschlossene Tools
 
-Folgende Tools werden bei der Discovery übersprungen:
-
 | Tool | Grund |
 |------|-------|
-| `search_codes` | Probleme mit ICD-10-GM |
 | `validate_biomedical_identifier` | Nicht relevant für typische Abfragen |
+
+`search_codes` war von Februar bis November 2026 ausgeschlossen, weil der Proxy ICD-10-GM damals nicht ohne Versionsangabe durchsuchen konnte und unbegrenzt große Ergebnisse lieferte. Beides ist in terminology-mcp behoben (automatische Versionswahl, Count-Begrenzung), `search_codes` ist wieder die primäre Suche für alle Systeme.
+
+### Auspacken der MCP-Antworten
+
+`/call_tool` liefert das MCP-Format `{"content": [{"type": "text", "text": "<JSON>"}], "isError": false}`. Die Bridge packt den Text aus und parst ihn als JSON, bevor Retry-Logik und Kürzung darauf schauen. Tool-Fehler kommen als HTTP 200 mit `isError` an und werden zu einem expliziten `{"error": ...}` für das Modell.
+
+Bis November 2026 fehlte dieser Schritt. Die Retry-Logik sah deshalb nie Treffer, lief immer bis zum kürzesten Suchwort durch und das Modell bekam den Umschlag als 4000-Zeichen-String. Sichtbar war das als Antworten mit Codes, die das Suchwort gar nicht enthielten.
+
+### Tool-Schleife
+
+Ein Modell darf pro Frage bis zu vier Tool-Runden ausführen, etwa erst suchen, dann nachschlagen, dann verfeinern. Die letzte Runde läuft ohne Tools, damit das Modell antworten muss. Wiederholt ein Modell denselben Aufruf mit denselben Argumenten, endet die Schleife vorzeitig. Vorher gab es genau eine Runde; gpt-oss und qwen3 endeten dann mit leerer Antwort, wenn sie einen zweiten Aufruf wollten.
 
 ### Smart Search Retry
 
-Bei `search_across_versions` verwendet die Bridge eine intelligente Retry-Strategie:
+Bei `search_across_versions` probiert die Bridge den Suchbegriff und dann progressiv kürzere Varianten, bis `uniqueCodes` Treffer enthält:
 
-1. Zuerst wird der **exakte Suchbegriff** genutzt
-2. Bei 0 Treffern wird progressiv das **letzte Wort** entfernt
-3. Beispiel: "Diabetes mellitus Typ 2" -> "Diabetes mellitus Typ" -> "Diabetes mellitus" -> "Diabetes"
+1. "Diabetes mellitus Typ 2"
+2. "Diabetes mellitus Typ"
+3. "Diabetes mellitus"
+4. "Diabetes"
 
-Dies kompensiert das Problem, dass lokale LLMs oft zu spezifische Suchbegriffe generieren.
+Seit dem Token-Filter in terminology-mcp 1.1.4 (jedes Wort muss im Display vorkommen, Reihenfolge egal) greift meist schon der erste Versuch.
 
 ### Tool Call Parser
 
 Lokale LLMs erzeugen Tool-Aufrufe nicht immer im nativen Format. Die Bridge unterstützt drei Formate:
 
-#### 1. Natives Ollama Format (bevorzugt)
+1. **Natives Ollama Format** über die `tools`-Eigenschaft der Ollama-API (bevorzugt)
+2. **XML Format**: `<function=lookup_code><parameter=system>http://snomed.info/sct</parameter><parameter=code>84114007</parameter></function>`
+3. **Emoji Format**: `🔧 lookup_code(system=http://snomed.info/sct, code=84114007)`
 
-Das LLM nutzt die `tools`-Eigenschaft der Ollama-API direkt.
-
-#### 2. XML Format
-
-```
-<function=lookup_code><parameter=system>http://snomed.info/sct</parameter><parameter=code>84114007</parameter></function>
-```
-
-#### 3. Emoji Format
-
-```
-🔧 lookup_code(system=http://snomed.info/sct, code=84114007)
-```
-
-Die Bridge erkennt diese Formate automatisch, extrahiert die Tool-Aufrufe, führt sie aus und entfernt die Formatierung aus der Antwort.
+Die Bridge erkennt die Formate automatisch, führt die Aufrufe aus und entfernt die Formatierung aus der Antwort. Die ausgeführten Aufrufe stehen als 🔧-Zeilen am Anfang jeder Antwort.
 
 ### Result Trimming
 
 Um Context-Overflow bei lokalen LLMs zu vermeiden, werden Tool-Ergebnisse gekürzt:
 
-| Regel | Wert |
-|-------|------|
-| Maximale Ergebnisgröße | 4000 Zeichen |
-| `search_across_versions` | Nur neueste Version + max. 10 Codes |
-| Generisches Trimming | Abschneiden bei Überschreitung des Limits |
+| Tool | Kürzung |
+|------|---------|
+| `search_codes` | Expansion auf `code`, `display`, `system` reduziert, maximal 20 Codes, plus `total`, `source`, `appliedVersion` |
+| `search_across_versions` | nur neueste Version mit Treffern, maximal 10 Codes, plus Gesamtzahl eindeutiger Codes |
+| alle anderen | Abschneiden bei 4000 Zeichen |
 
 ### System-Prompt
 
-Die Bridge generiert automatisch einen System-Prompt, der:
+Die Bridge generiert bei jedem Chat einen System-Prompt, der
 
-- Alle verfügbaren Tools auflistet
-- Suchstrategien vorgibt (kurze Suchbegriffe, Hauptwörter bevorzugen)
-- Das LLM anweist, immer ein Tool aufzurufen bevor es antwortet
-- Das Raten oder Erfinden von Codes verbietet
+- alle entdeckten Tools mit Kurzbeschreibung auflistet,
+- die CodeSystem-URLs von LOINC, SNOMED CT, ICD-10-GM, OPS, ATC und Alpha-ID wörtlich vorgibt,
+- die Rollen festlegt: `search_codes` als primäre Suche für alle Systeme, `search_across_versions` nur für Jahrgangsvergleiche der BfArM-Systeme, `search_common_loinc` erst danach für Nutzungsrang und deutsche Labels,
+- Abkürzungen wie EF, IVSd oder PWd vor der Suche in englische LOINC-Begriffe übersetzen lässt,
+- das Modell anweist, immer ein Tool aufzurufen und nie Codes aus dem Gedächtnis zu nennen.
+
+### Modelle im Vergleich
+
+Gemessen im November 2026 mit drei Fragen (ICD-10-GM-Suche mit vertauschter Wortreihenfolge, LOINC-Code für die Ejektionsfraktion, LOINC-Code für die Septumdicke) über die Bridge:
+
+| Modell | Tool-Aufrufe | Dauer pro Frage | Einordnung |
+|--------|--------------|-----------------|------------|
+| `qwen2.5:7b` | ruft Tools zuverlässig, übersetzt Abkürzungen nicht von selbst | 10 bis 20 s | Standard der WebUI |
+| `qwen3:14b` | beste Suchbegriffe, übersetzt Abkürzungen, verkettet Aufrufe | 70 bis 140 s | beste Qualität, nahe am 120-s-Timeout der Bridge |
+| `gpt-oss:20b` | gute und schnelle Aufrufe | 20 bis 35 s | Kandidat für die WebUI |
+| `llama3.1:8b` | rät Codes und schlägt sie dann nach | 10 bis 20 s | ungeeignet |
 
 ### Konfiguration
 
 | Umgebungsvariable | Standard | Beschreibung |
 |-------------------|---------|-------------|
 | `BRIDGE_PORT` | `8000` | Host-Port |
-| `OLLAMA_URL` | `http://host.docker.internal:11434` | Ollama-Endpunkt |
-| `TERMINOLOGY_URL` | `http://terminology-mcp:3000` | Terminology MCP URL |
-| `ASKMII_URL` | `http://ask-mii:2026` | AskMII URL |
+| `OLLAMA_URL` | `http://host.docker.internal:11434` | natives Ollama auf dem Host |
+| `TERMINOLOGY_URL` | `http://terminology-mcp:3000` | REST-Proxy von terminology-mcp |
+| `DECISION_URL` | `http://decision-mcp:3002` | decision-mcp |
 
-**Hinweis zu `OLLAMA_URL`**: Der Standard `host.docker.internal` ist für Apple-Metal-GPU-Unterstützung optimiert (Ollama läuft nativ auf dem Host). Für Docker-Ollama (CPU) setze `OLLAMA_URL=http://ollama:11434`.
+Nach Codeänderungen: `docker compose -f docker-compose.terminology.yml build mcp-bridge && docker compose -f docker-compose.terminology.yml up -d --force-recreate mcp-bridge`. Nach einem Update von terminology-mcp die Bridge neu starten, damit sie die Tools erneut entdeckt.
 
 ### Health Check
 
@@ -115,6 +125,8 @@ Antwort:
 {
   "status": "ok",
   "service": "mcp-openai-bridge",
-  "tools": 12
+  "tools": 20
 }
 ```
+
+Was die Bridge beim Terminologieserver auslöst, steht im Call-Log `logs/terminology-mcp/terminology-calls.jsonl` (Einträge mit `"transport": "rest"` für `/call_tool`, daneben der MCP-Eintrag des Tools mit Quelle und Trefferzahl).

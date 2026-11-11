@@ -2,29 +2,25 @@ CEIR-OS bietet eine vollständige lokale LLM-Infrastruktur: Ollama als Modell-Se
 
 ### Ollama Server
 
-| Eigenschaft | Wert |
-|------------|------|
-| Container | `ceir-ollama` |
-| Port | 11434 |
-| Image | `ollama/ollama:latest` |
-| Volume | `ollama-data` (heruntergeladene Modelle) |
-
-Beim ersten Start lädt der Init-Container `ceir-ollama-init` automatisch das Standard-Modell `qwen2.5:7b` herunter.
+Im aktuellen Stack (`docker-compose.terminology.yml`) läuft Ollama **nativ auf dem Host** auf Port 11434, nicht im Container. Auf Apple Silicon ist das die einzige Möglichkeit, die Metal-GPU zu nutzen. Die Bridge erreicht Ollama über `host.docker.internal`. Modelle werden mit `ollama pull <modell>` geladen, der ältere Komplettstack (`docker-compose.yml`) enthält alternativ den Container `ceir-ollama` mit Init-Container, der `qwen2.5:7b` automatisch lädt.
 
 ### Modell-Empfehlungen
 
-| Modell | Größe | Stärken | Empfehlung |
-|--------|---------|----------|-----------|
-| `qwen2.5:7b` | 4.7 GB | Gute Balance aus Qualität und Geschwindigkeit | **Standard** - wird automatisch geladen |
-| `qwen3:14b` | 9.0 GB | Besseres Tool Calling, komplexere Antworten | Empfohlen bei ausreichend RAM/VRAM |
-| `llama3.1:8b` | 4.7 GB | Starke allgemeine Fähigkeiten | Alternative zu Qwen |
-| `mistral:7b` | 4.1 GB | Schnell, gute europäische Sprachen | Für einfache Abfragen |
-| `gemma2:9b` | 5.4 GB | Gutes Sprachverständnis | Alternative |
+Gemessen im November 2026 über die Bridge mit Terminologie-Fragen (Details auf der Seite [MCP Bridge](mcp-bridge.html)):
 
-Weitere Modelle können manuell geladen werden:
+| Modell | Größe | Tool-Calling | Dauer pro Frage | Empfehlung |
+|--------|-------|--------------|-----------------|------------|
+| `qwen2.5:7b` | 4.7 GB | zuverlässig, übersetzt Abkürzungen nicht von selbst | 10 bis 20 s | **Standard** der WebUI |
+| `qwen3:14b` | 9.0 GB | beste Suchbegriffe, verkettet Aufrufe | 70 bis 140 s | beste Qualität, langsam |
+| `gpt-oss:20b` | 14 GB | gute und schnelle Aufrufe | 20 bis 35 s | Kandidat für die WebUI, braucht viel RAM |
+| `llama3.1:8b` | 4.7 GB | rät Codes und schlägt sie dann nach | 10 bis 20 s | ungeeignet |
+
+Große Modelle verdrängen den nativen Open-Jev-Server in den Swap, dann laufen Tool-Aufrufe in das 120-Sekunden-Timeout der Bridge. Deshalb sind in der Compose die Hintergrundaufgaben der WebUI (Titel, Tags, Suchanfragen) abgeschaltet und `TASK_MODEL` auf `qwen2.5:7b` gesetzt.
+
+Modelle laden:
 
 ```bash
-docker exec ceir-ollama ollama pull qwen3:14b
+ollama pull qwen3:14b
 ```
 
 ### GPU-Unterstützung
@@ -86,7 +82,7 @@ Open WebUI ist die Chat-Oberfläche von CEIR-OS. Sie ist so konfiguriert, dass a
 
 #### Wichtige Einstellungen
 
-Die folgenden Einstellungen sind in der `docker-compose.yml` bereits korrekt konfiguriert:
+Die folgenden Einstellungen sind in `docker-compose.terminology.yml` bereits korrekt konfiguriert:
 
 | Einstellung | Wert | Erklärung |
 |------------|------|-----------|
@@ -114,8 +110,9 @@ Diese Einstellungen können in OpenWebUI unter "Settings > Models" pro Modell an
 1. Öffne `http://localhost:3080` im Browser
 2. Wähle ein Modell (z.B. `qwen2.5:7b`)
 3. Stelle eine Frage wie: "Was ist der ICD-10 Code für Diabetes mellitus Typ 2?"
-4. Das LLM erkennt den Tool-Bedarf und die Bridge führt automatisch `search_across_versions` aus
-5. Das Ergebnis (z.B. E11.9) wird in die Antwort eingebettet
+4. Das LLM erkennt den Tool-Bedarf, die Bridge führt `search_codes` oder `search_across_versions` aus, bei Bedarf mehrere Runden
+5. Das Ergebnis (z.B. E11.9) wird in die Antwort eingebettet, die 🔧-Zeilen am Anfang zeigen die Aufrufe
+6. Was beim Terminologieserver ankam, steht in `logs/terminology-mcp/terminology-calls.jsonl`
 
 ### Konfiguration
 

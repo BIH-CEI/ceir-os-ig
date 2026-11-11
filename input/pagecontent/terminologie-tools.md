@@ -1,14 +1,15 @@
-Diese Seite beschreibt alle 8 Tools des Terminology MCP Servers mit Parametern, Beispielen und Hinweisen zur Verwendung.
+Diese Seite beschreibt die wichtigsten der 19 Tools des Terminology MCP Servers mit Parametern, Beispielen und Hinweisen zur Verwendung. Die vollständige Liste liefert `curl -s localhost:3000/tools | jq '.tools[].name'`.
 
 ### Tool-Übersicht
 
-Die 8 Tools nutzen unterschiedliche Terminologie-Quellen (siehe [Terminology MCP Server](terminologie-mcp.html) für Details):
+Die Tools nutzen unterschiedliche Terminologie-Quellen (siehe [Terminology MCP Server](terminologie-mcp.html) für Details):
 
 | Nr. | Tool | Quelle | Beschreibung |
 |-----|------|--------|-------------|
+| 0 | `search_codes` | Snowstorm / MII | **Primäre Suche** nach Anzeigetext in jedem CodeSystem, auch LOINC und SNOMED CT; Token-Filter: jedes Suchwort muss im Display vorkommen, Reihenfolge egal |
 | 1 | `validate_code` | Snowstorm / MII / Lokal | Code in einem CodeSystem validieren |
 | 2 | `lookup_code` | Snowstorm / MII / Lokal | Details für einen bekannten Code abrufen |
-| 3 | `search_common_loinc` | Lokal (Dateien) | Schnelle lokale LOINC-Suche mit deutschen Labels |
+| 3 | `search_common_loinc` | Lokal (Dateien) | Nachrangiger LOINC-Nachschlag: Nutzungsrang und deutsche Labels der 20.000 häufigsten Codes |
 | 4 | `get_german_label` | Lokal (Dateien) | Deutsche LOINC-Übersetzung |
 | 5 | `search_across_versions` | Remote (MII OntoServer) | Versionübergreifende Suche (ICD-10-GM, OPS, ATC) |
 | 6 | `list_panels` | Lokal (Dateien) | LOINC-Panels auflisten |
@@ -124,7 +125,7 @@ Ruft Details für einen bekannten Code ab: Display-Name, Properties und Überset
 
 ### 3. search_common_loinc
 
-Schnelle lokale Suche in den häufigsten LOINC-Codes mit deutschen Labels. Bevorzugtes Tool für LOINC-Suchen.
+Lokaler Index der etwa 20.000 am häufigsten genutzten LOINC-Codes mit Nutzungsrang und deutschen Labels aus der offiziellen deDE-Übersetzung. Kein Ersatz für `search_codes`: viele gültige Codes, etwa die meisten Echokardiographie-Messungen, fehlen im Index, 0 Treffer hier heißen also nichts. Sinnvoll nach einer `search_codes`-Suche, um zu prüfen, welcher von mehreren Kandidaten gebräuchlich ist, für deutsche Labels und als Offline-Fallback.
 
 **Parameter:**
 
@@ -361,7 +362,8 @@ Schlägt Details zu einem LOINC Answer Code nach. Answer Codes werden in LOINC f
 
 | Szenario | Empfohlenes Tool | Beispiel |
 |----------|-----------------|---------|
-| LOINC-Code suchen | `search_common_loinc` | "HbA1c", "Glucose", "Kreatinin" |
+| LOINC-Code suchen | `search_codes` mit `system: http://loinc.org`, englische Begriffe ("ejection fraction", "interventricular septum diastole") | danach `search_common_loinc` für Rang und deutsches Label |
+| SNOMED-CT-Konzept suchen | `search_codes` mit `system: http://snomed.info/sct` | "atrial fibrillation" |
 | ICD-10 Code suchen | `search_across_versions` | "Diabetes", "Pneumonie" |
 | OPS Code suchen | `search_across_versions` | "Appendektomie", "Koloskopie" |
 | ATC Code suchen | `search_across_versions` | "Metformin", "Ibuprofen" |

@@ -16,7 +16,7 @@ CEIR-OS stellt rund 13 Services bereit, die über ein gemeinsames Docker-Netzwer
 |---------|------|--------|----------|
 | Snowstorm | 8090 | Eigener Container | SNOMED CT FHIR TermServer (v10.8.2) auf Elasticsearch |
 | SNOMED Browser | 4000 | Eigener Container | Web-Oberfläche für SNOMED CT |
-| Terminology MCP | 3000 / 3002 | Eigener Container | Zentraler Terminologie-Zugang mit 8 MCP-Tools |
+| Terminology MCP | 3000 / 3002 | Eigener Container | Zentraler Terminologie-Zugang mit 19 MCP-Tools |
 
 Der Terminology MCP aggregiert drei Terminologie-Quellen:
 
@@ -85,6 +85,6 @@ Details zur Konfiguration und Installation findest du auf der Seite [Installatio
 | [Zotero Literaturverwaltung](zotero-comfort.html) | Literaturverwaltung mit PubMed- und arXiv-Integration |
 | [MCP-OpenAI Bridge](mcp-bridge.html) | Bridge zwischen MCP-Tools und lokalen LLMs |
 | [Lokale LLMs](lokale-llms.html) | Ollama, OpenWebUI und Modell-Empfehlungen |
-| [Terminologie-Tools](terminologie-tools.html) | Alle 8 Tools mit Parametern und Beispielen |
+| [Terminologie-Tools](terminologie-tools.html) | Die wichtigsten Tools mit Parametern und Beispielen |
 | [FHIR Mappings](fhir-mappings.html) | ConceptMap, StructureMap und Mapping-Workflows |
 | [Fehlerbehebung](troubleshooting.html) | Häufige Probleme und Lösungen |

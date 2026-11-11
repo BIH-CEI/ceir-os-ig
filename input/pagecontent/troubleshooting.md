@@ -1,4 +1,59 @@
-Diese Seite beschreibt häufige Probleme beim Betrieb von CEIR-OS und deren Lösungen.
+Diese Seite beschreibt häufige Probleme beim Betrieb von CEIR-OS und deren Lösungen. Die Abschnitte zu Elasticsearch, Unpacker und Importer betreffen den älteren Komplettstack (`docker-compose.yml`); im aktuellen Stack (`docker-compose.terminology.yml`) heißen die Container `snowstorm` und `terminology-mcp`.
+
+### Container erreichen keine HTTPS-Ziele mehr
+
+**Symptom:** Suchen über den OntoServer schlagen plötzlich fehl, `docker exec terminology-mcp wget -O /dev/null https://www.google.com/` bricht mit "unexpected eof" ab, der Rechner selbst ist online. Der Fehler trifft alle Container.
+
+**Ursache:** Docker Desktop übernimmt die automatische Proxy-Konfiguration (PAC) von macOS und leitet Container-Verkehr über den Firmenproxy, der außerhalb des Firmennetzes nicht auflösbar ist. Prüfen:
+
+```bash
+tail ~/Library/Containers/com.docker.docker/Data/log/host/httpproxy.log
+# "routed via automatic system PAC file proxy http://proxy...:8080" = genau dieses Problem
+```
+
+**Lösung:** In Docker Desktop unter Settings, Resources, Proxies auf manuelle Konfiguration ohne Einträge stellen. Oder Docker Desktop nach einem Netz- oder VPN-Wechsel neu starten.
+
+### "getaddrinfo ENOTFOUND blaze-full" in Suchantworten
+
+**Symptom:** `search_codes` oder `/search` liefert ein OperationOutcome mit `request to http://blaze-full:8080/fhir/ValueSet/$expand failed`.
+
+**Ursache:** Der OntoServer war nicht erreichbar (Zertifikat, Netz, Server down) und der Blaze-Fallback läuft nicht. Der eigentliche Fehler des OntoServers ist in dieser Meldung nicht sichtbar.
+
+**Diagnose:**
+
+```bash
+curl -s localhost:3000/ready | jq .backends       # ontoserver: reachable?
+docker exec terminology-mcp wget -q -O /dev/null --server-response https://ontoserver.mii-termserv.de/fhir/metadata 2>&1 | head -1   # 400 ohne Zertifikat ist in Ordnung, TLS-Fehler nicht
+```
+
+**Lösung:** Je nach Befund Netz (siehe oben), Zertifikat und Passphrase prüfen, oder Blaze als Fallback starten (`docker-compose.blaze-full.yml`).
+
+### Zertifikat wird nicht entschlüsselt ("bad decrypt")
+
+**Symptom:** Direkt nach dem Start meldet terminology-mcp "bad decrypt" und fällt auf Blaze zurück, obwohl die Passphrase in `.env` stimmt.
+
+**Ursache:** Eine in der Shell exportierte Variable `CERT_PASSPHRASE` (etwa aus `~/.zshrc`) schlägt den Wert aus `.env`.
+
+**Lösung:** `env -u CERT_PASSPHRASE docker compose -f docker-compose.terminology.yml up -d --force-recreate terminology-mcp`, oder den Export entfernen.
+
+### Docker Desktop startet nach einem Quit nicht sauber
+
+**Symptom:** `docker info` liefert nur noch "dialing 192.168.65.x:2376: no route to host" oder hängt, die Docker-VM ist weg, der Backend-Prozess läuft aber noch.
+
+**Lösung:** Alle `com.docker`-Prozesse beenden und Docker Desktop neu öffnen:
+
+```bash
+pkill -f 'Docker Desktop.app'; pkill -f com.docker.backend
+open -a Docker
+```
+
+### Antwort nennt Codes ohne das Suchwort
+
+**Symptom:** Die WebUI-Antwort auf "Diabetes mellitus Typ" enthält E14 oder P70.2, obwohl "Typ" im Display fehlt.
+
+**Ursache:** Bridge vor November 2026: die Retry-Logik konnte die MCP-Antwort nicht lesen und gab immer das Ergebnis des kürzesten Suchworts zurück.
+
+**Lösung:** Bridge neu bauen (`docker compose -f docker-compose.terminology.yml build mcp-bridge`) und mit `--force-recreate` starten. Das Call-Log zeigt dann pro Frage nur noch die wirklich nötigen Aufrufe.
 
 ### Snowstorm startet nicht
 
@@ -81,17 +136,17 @@ Während des Imports ist Snowstorm bereits gestartet, aber noch nicht vollständ
 
 ### MII OntoServer nicht erreichbar
 
-**Symptom:** `search_across_versions` liefert Fehler für ICD-10-GM, OPS oder ATC.
+**Symptom:** `search_codes` oder `search_across_versions` liefern Fehler für ICD-10-GM, OPS oder ATC, `curl -s localhost:3000/ready` zeigt `ontoserver: unreachable`.
 
 **Ursache 1: mTLS-Zertifikate fehlen oder sind ungültig**
 
 ```bash
 # Terminology MCP Logs prüfen
-docker logs ceir-terminology-mcp 2>&1 | grep -i cert
+docker logs terminology-mcp 2>&1 | grep -i cert
 ```
 
 Prüfe:
-- Sind die Zertifikat-Dateien im `CERTS_PATH`-Verzeichnis vorhanden?
+- Sind die Zertifikat-Dateien im gemounteten certs-Verzeichnis vorhanden (`~/code/helper/terminology-mcp/certs`)?
 - Ist `CERT_PASSPHRASE` korrekt gesetzt?
 - Sind die Base64-kodierten Werte (falls verwendet) vollständig?
 
@@ -100,8 +155,10 @@ Prüfe:
 Der MII OntoServer ist ein externer Dienst. Prüfe die Erreichbarkeit:
 
 ```bash
-docker exec ceir-terminology-mcp curl -k https://mii-termserv.de/fhir/metadata
+docker exec terminology-mcp wget -q -O /dev/null --server-response https://ontoserver.mii-termserv.de/fhir/metadata 2>&1 | head -1
 ```
+
+HTTP 400 ohne Client-Zertifikat ist das erwartete Ergebnis, ein TLS-Abbruch deutet auf das Proxy-Problem am Anfang dieser Seite.
 
 ### Tools funktionieren nicht in OpenWebUI
 
@@ -143,9 +200,10 @@ Nicht alle Modelle unterstützen Tool Calling zuverlässig. Empfohlene Modelle:
 
 | Modell | Tool Calling |
 |--------|-------------|
-| `qwen2.5:7b` | Gut |
-| `qwen3:14b` | Sehr gut |
-| `llama3.1:8b` | Mäßig |
+| `qwen2.5:7b` | Gut, schnell |
+| `qwen3:14b` | Sehr gut, langsam |
+| `gpt-oss:20b` | Gut, schnell |
+| `llama3.1:8b` | Ungeeignet, rät Codes |
 
 ### LOINC-Suche liefert keine deutschen Labels
 
@@ -156,7 +214,7 @@ Nicht alle Modelle unterstützen Tool Calling zuverlässig. Empfohlene Modelle:
 Prüfe:
 
 ```bash
-docker exec ceir-terminology-mcp ls /app/loinc/
+docker exec terminology-mcp ls /app/loinc/
 ```
 
 Das Verzeichnis muss die LOINC-Distribution enthalten. Prüfe den `LOINC_PATH` in der `.env`:

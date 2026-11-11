@@ -87,7 +87,7 @@ Im Regelbetrieb greift Claude Code oder Claude Desktop per MCP direkt auf die Se
    - **Lokale Dateien** für LOINC (In-Memory)
 4. Ergebnis wird direkt an Claude zurückgegeben
 
-### Datenfluss: Open WebUI + lokale LLMs (in Entwicklung)
+### Datenfluss: Open WebUI + lokale LLMs
 
 Als Alternative zu Claude kann CEIR-OS auch mit lokalen LLMs über Open WebUI betrieben werden. Die MCP Bridge übersetzt dabei MCP-Tools ins OpenAI Function Calling Format.
 
@@ -110,12 +110,14 @@ Als Alternative zu Claude kann CEIR-OS auch mit lokalen LLMs über Open WebUI be
 ```
 
 **Features der MCP Bridge:**
-- Dynamische Tool-Discovery von allen MCP-Servern
+- Dynamische Tool-Discovery von terminology-mcp und decision-mcp
+- Auspacken der MCP-Antworten, bis zu vier Tool-Runden pro Frage
 - Smart Search Retry (progressiv kürzere Suchbegriffe)
 - Emoji/XML Tool Call Parser für lokale LLMs
-- Result Trimming (max 4000 Zeichen für begrenzte Kontextfenster)
+- Result Trimming (search_codes und search_across_versions strukturiert, sonst 4000 Zeichen)
+- System-Prompt mit CodeSystem-URLs und Tool-Rollen
 
-**Status:** Funktionsfähig mit qwen3:14b. Modell-Qualität und Tool-Calling-Zuverlässigkeit sind noch nicht auf Claude-Niveau — siehe [MCP Bridge](mcp-bridge.html) für Details.
+**Status:** Im Einsatz für Mapping-Tests mit qwen2.5:7b, qwen3:14b und gpt-oss:20b. Tool-Calling-Zuverlässigkeit ist modellabhängig und wird im Repo `agentic-terminology-mapping` gemessen, siehe [MCP Bridge](mcp-bridge.html) für die Modellübersicht.
 
 **Ausblick:** Langfristig sollen auch andere Modelle (Open Source, kommerzielle Alternativen) unterstützt werden. Voraussetzung dafür sind belastbare Evaluationen (Evals) pro Anwendungsfall — insbesondere für Tool-Calling-Zuverlässigkeit, Terminologie-Korrektheit und Antwortqualität auf Deutsch.
 
@@ -132,6 +134,7 @@ Als Alternative zu Claude kann CEIR-OS auch mit lokalen LLMs über Open WebUI be
 | `askmii-data` | AskMII | Instanz-ID und Session-Logs |
 
 Zusätzlich werden über Host-Bind-Mounts bereitgestellt:
-- SNOMED CT Paket (ZIP) via `SNOMED_PACKAGE_PATH`
-- mTLS-Zertifikate via `CERT_DIR`
+- SNOMED CT Paket (ZIP) via `SNOMED_PACKAGE_PATH` (nur im älteren Komplettstack `docker-compose.yml`; `docker-compose.terminology.yml` nutzt das fertige Image `snowstorm-complete`)
+- mTLS-Zertifikate aus `~/code/helper/terminology-mcp/certs`
 - LOINC-Daten via `LOINC_PATH`
+- Call-Log von terminology-mcp nach `logs/terminology-mcp/` (REST und MCP, JSONL)
