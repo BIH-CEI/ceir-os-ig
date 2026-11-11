@@ -48,7 +48,7 @@ Bis November 2026 fehlte dieser Schritt. Die Retry-Logik sah deshalb nie Treffer
 
 ### Tool-Schleife
 
-Ein Modell darf pro Frage bis zu vier Tool-Runden ausführen, etwa erst suchen, dann nachschlagen, dann verfeinern. Die letzte Runde läuft ohne Tools, damit das Modell antworten muss. Wiederholt ein Modell denselben Aufruf mit denselben Argumenten, endet die Schleife vorzeitig. Vorher gab es genau eine Runde; gpt-oss und qwen3 endeten dann mit leerer Antwort, wenn sie einen zweiten Aufruf wollten.
+Ein Modell darf pro Frage bis zu vier Tool-Runden ausführen, etwa erst suchen, dann nachschlagen, dann verfeinern. Die letzte Runde läuft ohne Tools, damit das Modell antworten muss. Wiederholt ein Modell denselben Aufruf mit denselben Argumenten, endet die Schleife vorzeitig. Tool-Aufrufe im Antworttext (🔧, XML) werden nur geparst, solange Tools angeboten sind. Endet die Schleife nach Tool-Aufrufen ohne Text, fragt die Bridge einmal ohne Tools nach der Antwort. Vorher gab es genau eine Runde; gpt-oss und qwen3 endeten dann mit leerer Antwort, wenn sie einen zweiten Aufruf wollten.
 
 ### Smart Search Retry
 
@@ -78,7 +78,7 @@ Um Context-Overflow bei lokalen LLMs zu vermeiden, werden Tool-Ergebnisse gekür
 | Tool | Kürzung |
 |------|---------|
 | `search_codes` | Expansion auf `code`, `display`, `system` reduziert, maximal 20 Codes, plus `total`, `source`, `appliedVersion` |
-| `search_across_versions` | nur neueste Version mit Treffern, maximal 10 Codes, plus Gesamtzahl eindeutiger Codes |
+| `search_across_versions` | neueste Version mit Treffern (10 Codes) plus bis zu 15 eindeutige Codes mit ihren Jahrgängen und der Gesamtzahl. Bis November 2026 kam hier wegen eines falschen Schlüssels keine Codeliste an, die Modelle erfanden ICD-Codes |
 | alle anderen | Abschneiden bei 4000 Zeichen |
 
 ### System-Prompt
