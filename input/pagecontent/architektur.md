@@ -1,3 +1,5 @@
+*English version: [System architecture](architektur-en.html)*
+
 Diese Seite beschreibt die System-Architektur von CEIR-OS: Netzwerk, Service-Gruppen, Datenflüsse und persistente Volumes.
 
 ### Docker-Netzwerk
@@ -135,6 +137,6 @@ Als Alternative zu Claude kann CEIR-OS auch mit lokalen LLMs über Open WebUI be
 
 Zusätzlich werden über Host-Bind-Mounts bereitgestellt:
 - SNOMED CT Paket (ZIP) via `SNOMED_PACKAGE_PATH` (nur im älteren Komplettstack `docker-compose.yml`; `docker-compose.terminology.yml` nutzt das fertige Image `snowstorm-complete`)
-- mTLS-Zertifikate aus `~/code/helper/terminology-mcp/certs`
+- mTLS-Zertifikate aus dem Ordner in `CERTS_PATH` (frei wählbar), im Container unter `/app/certs-host`
 - LOINC-Daten via `LOINC_PATH`
 - Call-Log von terminology-mcp nach `logs/terminology-mcp/` (REST und MCP, JSONL)

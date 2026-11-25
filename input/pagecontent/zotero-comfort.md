@@ -1,3 +1,5 @@
+*English version: [Zotero literature management](zotero-comfort-en.html)*
+
 Zotero Comfort ist ein MCP-Server für die Literaturverwaltung in CEIR-OS. Er bietet Dual-Library-Unterstützung (Gruppen- und persönliche Bibliothek), PubMed- und arXiv-Integration sowie Tools für die Publikationsverwaltung.
 
 ### Übersicht

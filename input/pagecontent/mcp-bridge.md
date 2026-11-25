@@ -1,3 +1,5 @@
+*English version: [MCP-OpenAI bridge](mcp-bridge-en.html)*
+
 Die MCP-OpenAI Bridge verbindet lokale LLMs mit den MCP-Tools von CEIR-OS. Sie übersetzt MCP-Tool-Definitionen in das OpenAI Function Calling Format, führt Tool-Aufrufe aus und gibt die Ergebnisse an das Modell zurück. Open WebUI spricht ausschließlich mit der Bridge.
 
 ### Übersicht

@@ -1,3 +1,5 @@
+*English version: [Architecture decisions](architekturentscheidungen-en.html)*
+
 Diese Seite dokumentiert zentrale Architekturentscheidungen in CEIR-OS und deren Begründung. Sie dient dazu, das "Warum" hinter dem System zu bewahren, auch wenn die ursprünglichen Entscheider nicht verfügbar sind.
 
 ### ADR-1: Lokaler Snowstorm statt öffentlicher FHIR-Server

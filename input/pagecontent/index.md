@@ -1,3 +1,5 @@
+*English version: [Overview](index-en.html)*
+
 CEIR-OS (Claude-Enabled Interoperability Research Operating Stack) ist ein Docker-basiertes Toolkit für die medizinische Interoperabilitätsforschung. Es kombiniert Terminologieserver, KI-gestützte Werkzeuge und Literaturverwaltung in einer einheitlichen, lokal betreibbaren Umgebung.
 
 ### Was ist CEIR-OS?
@@ -52,20 +54,29 @@ Details: [Terminology MCP Server](terminologie-mcp.html) · [Terminologie-Tools]
 
 ### Schnellstart
 
+Vorher muss laufen bzw. bereitliegen (Details auf der Seite [Installation](installation.html)):
+
+- **Docker Desktop ist gestartet.** Sonst meldet jeder `docker`-Befehl `Cannot connect to the Docker daemon`. Prüfen mit `docker info`.
+- **Ollama läuft** als Dienst (`brew services start ollama`), nur für das Mapping-Tool nötig.
+- **Images sind da:** Snowstorm per `docker load`, terminology-mcp in einer der drei Varianten aus [Installation, Schritt 3](installation.html).
+- **LOINC-Distribution** ist entpackt, in einem beliebigen Ordner.
+
 ```bash
-# Repository klonen
+# Repository klonen (Ablageort frei wählbar)
 git clone https://github.com/BIH-CEI/ceir-os.git
 cd ceir-os
 
 # Konfiguration erstellen
 cp .env.example .env
-# .env anpassen (Pfade, Zertifikate, API-Keys)
+# in .env mindestens LOINC_PATH setzen; optional CERTS_PATH und CERT_PASSPHRASE für den MII-OntoServer
 
-# Stack starten
-docker compose up -d
+# Terminologie-Stack starten
+docker info > /dev/null && echo "Docker läuft"
+env -u CERT_PASSPHRASE docker compose -f docker-compose.terminology.yml up -d snowstorm terminology-mcp
 
 # Status prüfen
-docker compose ps
+docker compose -f docker-compose.terminology.yml ps
+curl -s localhost:3000/health
 ```
 
 Details zur Konfiguration und Installation findest du auf der Seite [Installation](installation.html).

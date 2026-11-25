@@ -1,3 +1,5 @@
+*English version: [Local LLMs](lokale-llms-en.html)*
+
 CEIR-OS bietet eine vollständige lokale LLM-Infrastruktur: Ollama als Modell-Server, die MCP Bridge für Tool-Integration und Open WebUI als Chat-Oberfläche.
 
 ### Ollama Server

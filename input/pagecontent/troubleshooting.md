@@ -1,3 +1,5 @@
+*English version: [Troubleshooting](troubleshooting-en.html)*
+
 Diese Seite beschreibt häufige Probleme beim Betrieb von CEIR-OS und deren Lösungen. Die Abschnitte zu Elasticsearch, Unpacker und Importer betreffen den älteren Komplettstack (`docker-compose.yml`); im aktuellen Stack (`docker-compose.terminology.yml`) heißen die Container `snowstorm` und `terminology-mcp`.
 
 ### Container erreichen keine HTTPS-Ziele mehr
@@ -27,6 +29,15 @@ docker exec terminology-mcp wget -q -O /dev/null --server-response https://ontos
 ```
 
 **Lösung:** Je nach Befund Netz (siehe oben), Zertifikat und Passphrase prüfen, oder Blaze als Fallback starten (`docker-compose.blaze-full.yml`).
+
+### Start bricht ab: "error while creating mount source path"
+
+**Symptom:** `docker compose up` bricht für `terminology-mcp` ab mit
+`error while creating mount source path '/host_mnt/Users/<name>/...': mkdir ...: permission denied`.
+
+**Ursache:** Die Compose-Datei verweist auf einen Ordner, den es auf diesem Rechner nicht gibt; Docker versucht ihn anzulegen und darf es nicht. In älteren ceir-os-Ständen stand der Zertifikatspfad des Maintainers fest in `docker-compose.terminology.yml`.
+
+**Lösung:** ceir-os aktualisieren (`git pull`). Die Pfade kommen jetzt aus `.env`: `CERTS_PATH` für Zertifikate (ohne Eintrag ein leeres `./certs`, Start ohne OntoServer), `LOINC_PATH` für LOINC. Pfade in `.env` absolut angeben, `~` wird dort nicht aufgelöst. Existiert der Ordner und der Fehler bleibt, unter Docker Desktop, Settings, Resources, File sharing prüfen, ob der Ordner freigegeben ist.
 
 ### Zertifikat wird nicht entschlüsselt ("bad decrypt")
 
@@ -146,7 +157,7 @@ docker logs terminology-mcp 2>&1 | grep -i cert
 ```
 
 Prüfe:
-- Sind die Zertifikat-Dateien im gemounteten certs-Verzeichnis vorhanden (`~/code/helper/terminology-mcp/certs`)?
+- Liegen die Zertifikat-Dateien in dem Ordner, auf den `CERTS_PATH` in `.env` zeigt? Im Log steht dann `Using volume-mounted certs in /app/certs-host`.
 - Ist `CERT_PASSPHRASE` korrekt gesetzt?
 - Sind die Base64-kodierten Werte (falls verwendet) vollständig?
 
@@ -302,14 +313,13 @@ Falls nichts anderes hilft:
 
 ```bash
 # Alle Container stoppen und entfernen
-docker compose down
-
-# Optional: Volumes löschen (ACHTUNG: SNOMED-Import muss wiederholt werden!)
-docker compose down -v
+docker compose -f docker-compose.terminology.yml down
 
 # Neu starten
-docker compose up -d
+env -u CERT_PASSPHRASE docker compose -f docker-compose.terminology.yml up -d snowstorm terminology-mcp
 
 # Logs beobachten
-docker compose logs -f
+docker compose -f docker-compose.terminology.yml logs -f
 ```
+
+Für den älteren Komplettaufbau (`docker-compose.yml`) gelten dieselben Befehle ohne `-f`; `docker compose down -v` löscht dort auch den SNOMED-Import.

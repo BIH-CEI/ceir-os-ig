@@ -1,3 +1,5 @@
+*English version: [Use cases](anwendungsfaelle-en.html)*
+
 Diese Seite beschreibt typische Nutzergruppen und wie sie CEIR-OS einsetzen.
 
 ### Wer nutzt CEIR-OS?

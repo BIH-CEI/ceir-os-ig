@@ -1,3 +1,5 @@
+*English version: [FHIR mappings](fhir-mappings-en.html)*
+
 CEIR-OS unterstützt FHIR-Mapping-Workflows für die Transformation und Zuordnung medizinischer Daten. Diese Seite beschreibt die verfügbaren Methoden und deren Integration mit den Terminologie-Tools.
 
 ### Übersicht der Mapping-Methoden

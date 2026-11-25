@@ -1,3 +1,5 @@
+*English version: [Terminology tools](terminologie-tools-en.html)*
+
 Diese Seite beschreibt die wichtigsten der 19 Tools des Terminology MCP Servers mit Parametern, Beispielen und Hinweisen zur Verwendung. Die vollständige Liste liefert `curl -s localhost:3000/tools | jq '.tools[].name'`.
 
 ### Tool-Übersicht

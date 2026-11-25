@@ -1,3 +1,5 @@
+*English version: [BabelFSH](babelfsh-en.html)*
+
 BabelFSH ist ein Tool der Medizininformatik-Initiative, das terminologische Artefakte (CSV, Excel, OWL, ClaML etc.) in FHIR CodeSystem-Ressourcen konvertiert. Es nutzt FSH (FHIR Shorthand) als Eingabeformat und eine Plugin-Architektur für verschiedene Quellformate.
 
 ### Übersicht
