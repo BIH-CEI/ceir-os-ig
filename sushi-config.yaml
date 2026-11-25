@@ -4,7 +4,7 @@ name: CEIROSImplementationGuide
 title: "CEIR-OS Bedienungsanleitung"
 description: "Bedienungsanleitung für CEIR-OS – Claude-Enabled Interoperability Research Operating Stack"
 status: draft
-version: 0.1.0
+version: 0.2.0
 fhirVersion: 4.0.1
 copyrightYear: 2024+
 releaseLabel: ci-build
