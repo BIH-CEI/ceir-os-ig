@@ -1,3 +1,5 @@
+*English version: [FHIR specification navigator](fhir-spec-mcp-en.html)*
+
 Der FHIR Spezifikations-Navigator ermöglicht den MCP-basierten Zugriff auf die FHIR R4 Spezifikation (v4.0.1). Er dient dazu, Ressourcen-Definitionen nachzuschlagen, Kardinalitäten zu prüfen und FHIR-Datentypen zu erkunden.
 
 ### Übersicht

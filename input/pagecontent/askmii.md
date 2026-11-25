@@ -1,3 +1,5 @@
+*English version: [AskMII FDPG](askmii-en.html)*
+
 AskMII ist ein MCP-Server für den Aufbau von Abfragen an das Forschungsdatenportal Gesundheit (FDPG) der Medizininformatik-Initiative (MII).
 
 ### Übersicht

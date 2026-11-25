@@ -54,6 +54,38 @@ pages:
     title: BabelFSH
   troubleshooting.md:
     title: Fehlerbehebung
+  index-en.md:
+    title: "Overview (English)"
+  anwendungsfaelle-en.md:
+    title: "Use cases (English)"
+  architektur-en.md:
+    title: "System architecture (English)"
+  architekturentscheidungen-en.md:
+    title: "Architecture decisions (English)"
+  installation-en.md:
+    title: "Installation (English)"
+  terminologie-mcp-en.md:
+    title: "Terminology MCP server (English)"
+  snowstorm-en.md:
+    title: "Snowstorm SNOMED CT (English)"
+  fhir-spec-mcp-en.md:
+    title: "FHIR specification navigator (English)"
+  askmii-en.md:
+    title: "AskMII FDPG (English)"
+  zotero-comfort-en.md:
+    title: "Zotero literature management (English)"
+  mcp-bridge-en.md:
+    title: "MCP-OpenAI bridge (English)"
+  lokale-llms-en.md:
+    title: "Local LLMs (English)"
+  terminologie-tools-en.md:
+    title: "Terminology tools (English)"
+  fhir-mappings-en.md:
+    title: "FHIR mappings (English)"
+  babelfsh-en.md:
+    title: "BabelFSH (English)"
+  troubleshooting-en.md:
+    title: "Troubleshooting (English)"
 
 menu:
   Übersicht: index.html
@@ -75,4 +107,21 @@ menu:
     Mappings: fhir-mappings.html
     BabelFSH: babelfsh.html
     Fehlerbehebung: troubleshooting.html
+  English:
+    Overview: index-en.html
+    Use cases: anwendungsfaelle-en.html
+    Installation: installation-en.html
+    System architecture: architektur-en.html
+    Architecture decisions: architekturentscheidungen-en.html
+    Terminology MCP: terminologie-mcp-en.html
+    Snowstorm: snowstorm-en.html
+    FHIR Navigator: fhir-spec-mcp-en.html
+    AskMII: askmii-en.html
+    Zotero: zotero-comfort-en.html
+    MCP Bridge: mcp-bridge-en.html
+    Local LLMs: lokale-llms-en.html
+    Tools: terminologie-tools-en.html
+    Mappings: fhir-mappings-en.html
+    BabelFSH: babelfsh-en.html
+    Troubleshooting: troubleshooting-en.html
   Artifacts: artifacts.html

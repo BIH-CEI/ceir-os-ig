@@ -1,3 +1,5 @@
+*English version: [Terminology MCP server](terminologie-mcp-en.html)*
+
 Der Terminology MCP Server ist der zentrale Terminologie-Zugang in CEIR-OS. Er bündelt den Zugriff auf mehrere Terminologie-Quellen in einer einheitlichen Schnittstelle.
 
 ### Übersicht

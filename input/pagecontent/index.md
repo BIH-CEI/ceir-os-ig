@@ -1,3 +1,5 @@
+*English version: [Overview](index-en.html)*
+
 CEIR-OS (Claude-Enabled Interoperability Research Operating Stack) ist ein Docker-basiertes Toolkit für die medizinische Interoperabilitätsforschung. Es kombiniert Terminologieserver, KI-gestützte Werkzeuge und Literaturverwaltung in einer einheitlichen, lokal betreibbaren Umgebung.
 
 ### Was ist CEIR-OS?

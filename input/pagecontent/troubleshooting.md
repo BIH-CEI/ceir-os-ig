@@ -1,3 +1,5 @@
+*English version: [Troubleshooting](troubleshooting-en.html)*
+
 Diese Seite beschreibt häufige Probleme beim Betrieb von CEIR-OS und deren Lösungen. Die Abschnitte zu Elasticsearch, Unpacker und Importer betreffen den älteren Komplettstack (`docker-compose.yml`); im aktuellen Stack (`docker-compose.terminology.yml`) heißen die Container `snowstorm` und `terminology-mcp`.
 
 ### Container erreichen keine HTTPS-Ziele mehr

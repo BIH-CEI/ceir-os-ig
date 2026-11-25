@@ -1,3 +1,5 @@
+*English version: [System architecture](architektur-en.html)*
+
 Diese Seite beschreibt die System-Architektur von CEIR-OS: Netzwerk, Service-Gruppen, Datenflüsse und persistente Volumes.
 
 ### Docker-Netzwerk

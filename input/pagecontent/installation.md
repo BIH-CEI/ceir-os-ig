@@ -1,3 +1,5 @@
+*English version: [Installation](installation-en.html)*
+
 Diese Seite beschreibt die Installation von CEIR-OS auf einem leeren Rechner: zuerst den Terminologie-Stack, dann das interaktive Mapping-Tool aus MCP Bridge und Open WebUI. Stand November 2026. Die Betriebsdetails (Routing, Versionen, Fallbacks) stehen im Repo unter `docs/terminology-routing.md`, die UI-Einstellungen unter `docs/openwebui-config.md`.
 
 ### Was läuft wo
